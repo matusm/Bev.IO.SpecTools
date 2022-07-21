@@ -6,7 +6,7 @@ namespace Bev.IO.SpectrumPod
     {
         public DateTime MeasurementDate;
         public DateTime ModificationDate;
-        public string Title = string.Empty;                 // original filename?
+        public string Title = string.Empty;                 // original filename? sample description
         public string DataType = string.Empty;              // INFRARED SPECTRUM, UV/VIS SPECTRUM, RAMAN SPECTRUM , ...
         public string Origin = string.Empty;                // ??? Exported PE Spectrum Data File, BEV
         public string Owner = string.Empty;                 // person who made the measurement 
@@ -27,5 +27,7 @@ namespace Bev.IO.SpectrumPod
         public string SpectrometerModel = string.Empty;
         public string SpectrometerSerialNumber = string.Empty;
         public string SoftwareID = string.Empty;
+        public string XLabel = string.Empty;
+        public string YLabel = string.Empty;
     }
 }

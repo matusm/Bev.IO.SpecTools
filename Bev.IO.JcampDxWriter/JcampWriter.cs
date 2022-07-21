@@ -1,120 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Bev.IO.SpectrumPod;
+using System;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bev.IO.JcampDxWriter
 {
     public class JcampWriter
     {
-
         private const string dataLabelFlag = "##";
         private const string dataLabelTerminator = "= ";    // trailing space included
         private const string tabularIndend = "   ";
         private const int maxColumns = 80;
         private Spectrum spectrum;
 
-        public string Title = string.Empty;
-        public string DataType = string.Empty;
-        public string Origin = string.Empty;
-        public string Owner = string.Empty;
-        public string SpectrometerSystem = string.Empty;
-        public string InstrumentParameters = string.Empty;
-        public string SampleDescription = string.Empty;
-        public string Concentrations = string.Empty;
-        public string SamplingProcedure = string.Empty;
-        public string State = string.Empty;
-        public string PathLength = string.Empty;
-        public string Pressure = string.Empty;
-        public string Temperature = string.Empty;
-        public string DataProcessing = string.Empty;
-        public string SourceReference = string.Empty;
-        public string CrossReference = string.Empty;
-        public string Class = string.Empty;
-
         public string Xunits = string.Empty;
         public string Yunits = string.Empty;
         public string Xlabel = string.Empty;
         public string Ylabel = string.Empty;
 
-        public DateTime MeasurementDate;
-
-        public SpectralSpacing AbscissaType = SpectralSpacing.Unknown;
-        public int Npoints;
-        public double DeltaX = double.NaN;
         public double Xfactor = 1;
         public double Yfactor = 1;
-        public double FirstX = double.NaN;
-        public double LastX = double.NaN;
-        public double FirstY = double.NaN;
-        public double MaxX = double.NaN;
-        public double MinX = double.NaN;
-        public double MaxY = double.NaN;
-        public double MinY = double.NaN;
 
-        public SimpleJcampData()
+        public JcampWriter(Spectrum spectrum)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-        }
-
-        public void SetSpectrum(Spectrum sortedSpectrum)
-        {
-            spectrum = sortedSpectrum;
-            Npoints = spectrum.Length;
-            FirstX = spectrum.FirstX;
-            LastX = spectrum.LastX;
-            FirstY = spectrum.FirstY;
-            MaxX = spectrum.MaxX;
-            MinX = spectrum.MinX;
-            MaxY = spectrum.MaxY;
-            MinY = spectrum.MinY;
-            AbscissaType = spectrum.AbscissaType;
-            if (spectrum.AbscissaType == SpectralSpacing.FixedSpacing)
-                DeltaX = spectrum.DeltaX;
-            else
-                DeltaX = double.NaN;
-            Xunits = spectrum.XUnitName;
-            Yunits = spectrum.YUnitName;
+            this.spectrum = spectrum;
         }
 
         public string GetDataRecords()
         {
             StringBuilder sb = new StringBuilder();
-            AppendRecord("TITLE", Title);
+            AppendRecord("TITLE", spectrum.Header.Title);
             AppendRecord("JCAMP-DX", "4.24");
-            AppendRecord("DATA TYPE", DataType);
-            AppendRecord("SAMPLE DESCRIPTION", SampleDescription);
-            AppendRecord("ORIGIN", Origin);
-            AppendRecord("OWNER", Owner);
-            AppendRecord("CLASS", Class);
-            AppendRecord("SOURCE REFERENCE", SourceReference);
-            AppendRecord("CROSS REFERENCE", CrossReference);
-            AppendRecord("SPECTROMETER/DATA SYSTEM", SpectrometerSystem);
-            AppendRecord("INSTRUMENT PARAMETERS", InstrumentParameters);
-            AppendRecord("DATE", MeasurementDate.ToString("yy/MM/dd"));
-            AppendRecord("TIME", MeasurementDate.ToString("HH:mm:ss"));
-            AppendRecord("LONG DATE", MeasurementDate.ToString("yyyy/MM/dd HH:mm:ssK")); // TODO this is not 4.24 compliant!
-            AppendRecord("NPOINTS", Npoints.ToString());
-            AppendRecord("XUNITS", Xunits);
-            AppendRecord("YUNITS", Yunits);
-            AppendNumRecord("FIRSTX", FirstX);
-            AppendNumRecord("FIRSTY", FirstY);
-            AppendNumRecord("LASTX", LastX);
-            AppendNumRecord("DELTAX", DeltaX);
-            AppendNumRecord("MINX", MinX);
-            AppendNumRecord("MAXX", MaxX);
-            AppendNumRecord("MINY", MinY);
-            AppendNumRecord("MAXY", MaxY);
+            AppendRecord("DATA TYPE", spectrum.Header.DataType);
+            AppendRecord("SAMPLE DESCRIPTION", spectrum.Header.SampleDescription);
+            AppendRecord("ORIGIN", spectrum.Header.Origin);
+            AppendRecord("OWNER", spectrum.Header.Owner);
+            AppendRecord("CLASS", spectrum.Header.Class);
+            AppendRecord("SOURCE REFERENCE", spectrum.Header.SourceReference);
+            AppendRecord("CROSS REFERENCE", spectrum.Header.CrossReference);
+            AppendRecord("SPECTROMETER/DATA SYSTEM", spectrum.Header.SpectrometerSystem);
+            AppendRecord("INSTRUMENT PARAMETERS", spectrum.Header.InstrumentParameters);
+            AppendRecord("DATE", spectrum.Header.MeasurementDate.ToString("yy/MM/dd"));
+            AppendRecord("TIME", spectrum.Header.MeasurementDate.ToString("HH:mm:ss"));
+            AppendRecord("LONG DATE", spectrum.Header.MeasurementDate.ToString("yyyy/MM/dd HH:mm:ssK")); // TODO this is not 4.24 compliant!
+            AppendRecord("NPOINTS", spectrum.Length.ToString());
+            AppendRecord("XUNITS", TranslateUnit(spectrum.XUnitName));
+            AppendRecord("YUNITS", TranslateUnit(spectrum.YUnitName));
+            AppendNumRecord("FIRSTX", spectrum.FirstX);
+            AppendNumRecord("FIRSTY", spectrum.FirstY);
+            AppendNumRecord("LASTX", spectrum.LastX);
+            AppendNumRecord("DELTAX", spectrum.DeltaX);
+            AppendNumRecord("MINX", spectrum.MinX);
+            AppendNumRecord("MAXX", spectrum.MaxX);
+            AppendNumRecord("MINY", spectrum.MinY);
+            AppendNumRecord("MAXY", spectrum.MaxY);
             AppendNumRecord("XFACTOR", Xfactor);
             AppendNumRecord("YFACTOR", Yfactor);
             AppendRecord("XLABEL", Xlabel);
             AppendRecord("YLABEL", Ylabel);
+            // here comes the actual data
+
             if (spectrum.AbscissaType == SpectralSpacing.FixedSpacing)
             {
                 AppendRecord("XYDATA", "(X++(Y..Y))");
-                foreach (var point in spectrum.GetSpectralData())
+                foreach (var point in spectrum.Data)
                 {
                     sb.AppendLine($"{tabularIndend}{point.X / Xfactor} {point.Y / Yfactor}");
                 }
@@ -122,7 +72,7 @@ namespace Bev.IO.JcampDxWriter
             if (spectrum.AbscissaType == SpectralSpacing.VariableSpacing)
             {
                 AppendRecord("XYPOINTS", "(XY..XY)");
-                foreach (var point in spectrum.GetSpectralData())
+                foreach (var point in spectrum.Data)
                 {
                     sb.AppendLine($"{tabularIndend}{point.X / Xfactor} , {point.Y / Yfactor}");
                 }
@@ -157,5 +107,39 @@ namespace Bev.IO.JcampDxWriter
             return $"{longString.Substring(0, maxColumns - 3)}...";
         }
 
+        private string TranslateUnit(string unitSymbol)
+        {
+            string symbol = unitSymbol.ToUpper().Trim();
+            if(string.IsNullOrWhiteSpace(symbol))
+               return "ARBITRARY UNITS";
+            switch (symbol)
+            {
+                case "NM":
+                    return "NANOMETERS";
+                case "CM-1":
+                case "1/CM":
+                    return "1/CM";
+                case "A":
+                    return "ABSORBANCE";
+                case "UM":
+                case "µM":
+                    return "MICROMETERS";
+                case "S":
+                case "SEC":
+                    return "SECONDS";
+                case "%T":
+                case "T":
+                    return "TRANSMITTANCE";
+                case "%R":
+                case "R":
+                    return "REFLECTANCE";
+                case "INT":
+                    return "INTENSITY"; // really?
+                case "EGY":
+                    return "ENERGY"; // really?
+                default:
+                    return symbol;
+            }
+        }
     }
 }
