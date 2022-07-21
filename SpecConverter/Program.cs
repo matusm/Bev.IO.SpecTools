@@ -51,8 +51,6 @@ namespace SpecConverter
             Console.WriteLine($"SpectrometerSN:        {spectrum.Header.SpectrometerSerialNumber}");
             Console.WriteLine($"SpectrometerSystem:    {spectrum.Header.SpectrometerSystem}");
             Console.WriteLine($"Title:                 {spectrum.Header.Title}");
-
-
             Console.WriteLine("=========================================================");
 
             return spectrum;

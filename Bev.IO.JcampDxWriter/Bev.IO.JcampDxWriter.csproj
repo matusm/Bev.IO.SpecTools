@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4B607A1A-8D7B-44D8-AC37-B064869C3380}</ProjectGuid>
+    <ProjectGuid>{5BA884D0-6EAE-4904-B078-33D2285956C5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bev.IO.SpectrumPod</RootNamespace>
-    <AssemblyName>Bev.IO.SpectrumPod</AssemblyName>
+    <RootNamespace>Bev.IO.JcampDxWriter</RootNamespace>
+    <AssemblyName>Bev.IO.JcampDxWriter</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -31,9 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="At.Matus.StatisticPod">
-      <HintPath>..\..\At.Matus.StatisticPod\bin\Release\At.Matus.StatisticPod.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,9 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SpectralHeader.cs" />
-    <Compile Include="SpectralPoint.cs" />
-    <Compile Include="Spectrum.cs" />
+    <Compile Include="JcampWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
