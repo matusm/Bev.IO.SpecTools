@@ -1,6 +1,7 @@
 ﻿using Bev.IO.FileLoader;
 using Bev.IO.PerkinElmerAsciiReader;
 using Bev.IO.SpectrumPod;
+using Bev.IO.JcampDxWriter;
 using System;
 using System.Globalization;
 using System.IO;
@@ -19,6 +20,9 @@ namespace SpecConverter
             foreach (string fn in filenames)
             {
                 Spectrum spec = ProcessFile(fn);
+                JcampWriter jw = new JcampWriter(spec);
+                Console.WriteLine(jw.GetDataRecords());
+
             }
 
         }
@@ -51,6 +55,7 @@ namespace SpecConverter
             Console.WriteLine($"SpectrometerSN:        {spectrum.Header.SpectrometerSerialNumber}");
             Console.WriteLine($"SpectrometerSystem:    {spectrum.Header.SpectrometerSystem}");
             Console.WriteLine($"Title:                 {spectrum.Header.Title}");
+            Console.WriteLine();
             Console.WriteLine("=========================================================");
 
             return spectrum;

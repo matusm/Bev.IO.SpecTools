@@ -9,7 +9,7 @@ namespace Bev.IO.JcampDxWriter
     {
         private const string dataLabelFlag = "##";
         private const string dataLabelTerminator = "= ";    // trailing space included
-        private const string tabularIndend = "   ";
+        private const string tabularIndend = "";
         private const int maxColumns = 80;
         private Spectrum spectrum;
 
@@ -60,7 +60,6 @@ namespace Bev.IO.JcampDxWriter
             AppendRecord("XLABEL", Xlabel);
             AppendRecord("YLABEL", Ylabel);
             // here comes the actual data
-
             if (spectrum.AbscissaType == SpectralSpacing.FixedSpacing)
             {
                 AppendRecord("XYDATA", "(X++(Y..Y))");
