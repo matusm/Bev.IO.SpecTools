@@ -24,8 +24,11 @@ namespace Bev.IO.SpectrumPod
         public string XUnitName { get; private set; } = string.Empty;
         public string YUnitName { get; private set; } = string.Empty;
 
-        public Spectrum()
+        public Spectrum() : this(SortOrder.Ascending){}
+
+        public Spectrum(SortOrder sortOrder)
         {
+            this.sortOrder = sortOrder;
             Header = new SpectralHeader();
         }
 
@@ -40,7 +43,7 @@ namespace Bev.IO.SpectrumPod
             spectralData.Add(value);
             xStat.Update(value.X);
             yStat.Update(value.Y);
-            spectralData.Sort();
+            SortData(sortOrder);
         }
 
         public void AddValue(double xValue, double yValue) => AddValue(new SpectralPoint(xValue, yValue));
@@ -68,10 +71,21 @@ namespace Bev.IO.SpectrumPod
             return SpectralSpacing.VariableSpacing;
         }
 
+        private void SortData(SortOrder sortOrder)
+        {
+            if (sortOrder == SortOrder.None)
+                return;
+            spectralData.Sort();
+            if (sortOrder == SortOrder.Ascending)
+                return;
+            spectralData.Reverse();
+        }
+
         private const double epsilon = 0.000001; // TODO works for Perkin Elmer spectrophotometer ascii files
-        private List<SpectralPoint> spectralData = new List<SpectralPoint>();
-        private StatisticPod xStat = new StatisticPod();
-        private StatisticPod yStat = new StatisticPod();
+        private readonly List<SpectralPoint> spectralData = new List<SpectralPoint>();
+        private SortOrder sortOrder;
+        private readonly StatisticPod xStat = new StatisticPod();
+        private readonly StatisticPod yStat = new StatisticPod();
     }
 
     public enum SpectralSpacing
@@ -79,5 +93,12 @@ namespace Bev.IO.SpectrumPod
         Unknown,
         FixedSpacing,   // ##XYDATA= (X++(Y..Y))
         VariableSpacing // ##XYPOINTS= (XY..XY)
+    }
+
+    public enum SortOrder
+    {
+        None,
+        Ascending,
+        Descending
     }
 }
