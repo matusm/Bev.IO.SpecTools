@@ -60,12 +60,12 @@ namespace Bev.IO.SpectrumPod
             SpectralPoint[] spec = Data;
             if (spec.Length < 3)
                 return SpectralSpacing.Unknown;
-            var lambdaDiff = new StatisticPod();
+            StatisticPod spacingStatistics = new StatisticPod();
             for (int i = 0; i < spec.Length - 1; i++)
             {
-                lambdaDiff.Update(spec[i + 1].X - spec[i].X);
+                spacingStatistics.Update(spec[i + 1].X - spec[i].X);
             }
-            double rangeOfSpacings = Math.Abs(lambdaDiff.Range);
+            double rangeOfSpacings = Math.Abs(spacingStatistics.Range);
             if (rangeOfSpacings < epsilon)
                 return SpectralSpacing.FixedSpacing;
             return SpectralSpacing.VariableSpacing;
@@ -83,7 +83,7 @@ namespace Bev.IO.SpectrumPod
 
         private const double epsilon = 0.000001; // TODO works for Perkin Elmer spectrophotometer ascii files
         private readonly List<SpectralPoint> spectralData = new List<SpectralPoint>();
-        private SortOrder sortOrder;
+        private readonly SortOrder sortOrder;
         private readonly StatisticPod xStat = new StatisticPod();
         private readonly StatisticPod yStat = new StatisticPod();
     }
