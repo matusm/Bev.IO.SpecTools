@@ -13,11 +13,6 @@ namespace Bev.IO.JcampDxWriter
         private const int maxColumns = 80;
         private Spectrum spectrum;
 
-        public string Xunits = string.Empty;
-        public string Yunits = string.Empty;
-        public string Xlabel = string.Empty;
-        public string Ylabel = string.Empty;
-
         public double Xfactor = 1;
         public double Yfactor = 1;
 
@@ -43,7 +38,7 @@ namespace Bev.IO.JcampDxWriter
             AppendRecord("INSTRUMENT PARAMETERS", spectrum.Header.InstrumentParameters);
             AppendRecord("DATE", spectrum.Header.MeasurementDate.ToString("yy/MM/dd"));
             AppendRecord("TIME", spectrum.Header.MeasurementDate.ToString("HH:mm:ss"));
-            AppendRecord("LONG DATE", spectrum.Header.MeasurementDate.ToString("yyyy/MM/dd HH:mm:ssK")); // TODO this is not 4.24 compliant!
+            AppendRecord("$LONG DATE", spectrum.Header.MeasurementDate.ToString("yyyy/MM/dd HH:mm:ssK")); // this is not 4.24 compliant!
             AppendRecord("NPOINTS", spectrum.Length.ToString());
             AppendRecord("XUNITS", TranslateUnit(spectrum.XUnitName));
             AppendRecord("YUNITS", TranslateUnit(spectrum.YUnitName));
@@ -57,8 +52,8 @@ namespace Bev.IO.JcampDxWriter
             AppendNumRecord("MAXY", spectrum.MaxY);
             AppendNumRecord("XFACTOR", Xfactor);
             AppendNumRecord("YFACTOR", Yfactor);
-            AppendRecord("XLABEL", Xlabel);
-            AppendRecord("YLABEL", Ylabel);
+            AppendRecord("XLABEL", spectrum.Header.XLabel);
+            AppendRecord("YLABEL", spectrum.Header.YLabel);
             // here comes the actual data
             if (spectrum.AbscissaType == SpectralSpacing.FixedSpacing)
             {

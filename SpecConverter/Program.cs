@@ -5,6 +5,7 @@ using Bev.IO.JcampDxWriter;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 
 namespace SpecConverter
 {
@@ -14,12 +15,23 @@ namespace SpecConverter
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
+            string appName = Assembly.GetExecutingAssembly().GetName().Name;
+            var appVersion = Assembly.GetExecutingAssembly().GetName().Version;
+
             string workingDirectory = Directory.GetCurrentDirectory();
             string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
             Array.Sort(filenames);
+
             foreach (string fn in filenames)
             {
                 Spectrum spec = ProcessFile(fn);
+                spec.Header.DataType = "UV/VIS SPECTRUM";
+                spec.Header.Title = spec.Header.SampleDescription;
+                spec.Header.SourceReference = Path.GetFileName(fn);
+                spec.Header.Origin = $"{appName} {appVersion}";
+                spec.Header.XLabel = "Wavelength / nm";
+                spec.Header.YLabel = "Transmittance / %";
+
                 JcampWriter jw = new JcampWriter(spec);
                 Console.WriteLine(jw.GetDataRecords());
 
