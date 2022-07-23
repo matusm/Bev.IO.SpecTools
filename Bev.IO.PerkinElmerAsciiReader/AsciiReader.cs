@@ -78,15 +78,15 @@ namespace Bev.IO.PerkinElmerAsciiReader
             int index = GetIndexOfUnits();
             Spectrum.SetUnitNames(ExtractLine(index + 1), ExtractLine(index + 2));
             // this is for test puposes only
-            double value1 = ParseToDouble(ExtractLine(index + 3));
-            double value2 = ParseToDouble(ExtractLine(index + 4));
-            double value3 = ParseToDouble(ExtractLine(index + 5));
-            double value4 = ParseToDouble(ExtractLine(index + 6));
-            double value5 = ParseToDouble(ExtractLine(index + 7));
-            double value6 = ParseToDouble(ExtractLine(index + 8));
-            double value7 = ParseToDouble(ExtractLine(index + 9));
-            double value8 = ParseToDouble(ExtractLine(index + 10));
-            Console.WriteLine($"1:{value1} 2:{value2} 3:{value3} 4:{value4} 5:{value5} 6:{value6} 7:{value7} 8:{value8}");
+            double value1 = ParseToDouble(ExtractLine(index + 3)); // unknown (1.0)
+            double value2 = ParseToDouble(ExtractLine(index + 4)); // unknown (0.0)
+            double value3 = ParseToDouble(ExtractLine(index + 5)); // FirstX of source data
+            double value4 = ParseToDouble(ExtractLine(index + 6)); // DeltaX of source data
+            double value5 = ParseToDouble(ExtractLine(index + 7)); // number of points
+            double value6 = ParseToDouble(ExtractLine(index + 8)); // unknown (8)
+            double value7 = ParseToDouble(ExtractLine(index + 9)); // MaxY
+            double value8 = ParseToDouble(ExtractLine(index + 10));// MinY
+            Console.WriteLine($"#GR - v1:{value1} v2:{value2} v6:{value6}");
         }
 
         private void ParseSpectralData()
