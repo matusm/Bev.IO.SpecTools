@@ -25,7 +25,7 @@ namespace SpecConverter
             foreach (string fn in filenames)
             {
                 Spectrum spec = ProcessFile(fn);
-                spec.Header.DataType = "UV/VIS SPECTRUM";
+                spec.Header.Type = SpectralType.UvVis;
                 spec.Header.Title = spec.Header.SampleDescription;
                 spec.Header.SourceReference = Path.GetFileName(fn);
                 spec.Header.Origin = $"{appName} {appVersion}";

@@ -176,15 +176,11 @@ namespace Bev.IO.PerkinElmerAsciiReader
             switch (FileSignature)
             {
                 case PeFileSignature.Unknown:
-                    return true;
                 case PeFileSignature.NoFile:
-                    return true;
                 case PeFileSignature.InValid:
                     return true;
                 case PeFileSignature.ValidVer400:
-                    return false;
                 case PeFileSignature.ValidVer160:
-                    return false;
                 case PeFileSignature.Valid:
                     return false;
             }
