@@ -73,9 +73,14 @@ namespace SpecConverter
             Console.WriteLine($"InstrumentParameters:  {spectrum.Header.InstrumentParameters}");
             Console.WriteLine($"DetectorChange:        {spectrum.Header.DetectorChange}");
             Console.WriteLine($"LampChange:            {spectrum.Header.LampChange}");
+
+                Console.WriteLine($"#FreeComments:         {spectrum.Header.FreeComments.Length}");
+                for (int i = 0; i < spectrum.Header.FreeComments.Length; i++)
+                {
+                    Console.WriteLine($"   free comment #{i}: {spectrum.Header.FreeComments[i]}");
+                }
+           
             Console.WriteLine("=========================================================");
-
-
             return spectrum;
         }
     }

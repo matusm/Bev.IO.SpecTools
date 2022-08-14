@@ -1,5 +1,6 @@
 ﻿using Bev.IO.SpectrumPod;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Bev.IO.PerkinElmerAsciiReader
@@ -75,15 +76,27 @@ namespace Bev.IO.PerkinElmerAsciiReader
             Spectrum.Header.SampleDescription = ExtractLine(8);
             if (FileSignature == PeFileSignature.ValidVer400)
             {
+                int offset = GetIndexOfHdr() - 75; // all lines below #15 are shifted by this amount if multiple comments are added
+                Spectrum.Header.FreeComments = ParseFreeComments(offset).ToArray();
                 Spectrum.Header.SpectrometerModel = ExtractLine(11);
                 Spectrum.Header.SpectrometerSerialNumber = ExtractLine(12);
                 Spectrum.Header.SpectrometerSystem = EstimateSpectrometerSystem();
                 Spectrum.Header.SoftwareID = ExtractLine(13);
-                Spectrum.Header.Resolution = ExtractLine(17);
-                Spectrum.Header.InstrumentParameters = ExtractLine(24);
-                Spectrum.Header.DetectorChange = ParseToDouble(ExtractLine(41));
-                Spectrum.Header.LampChange = ParseToDouble(ExtractLine(42));
+                Spectrum.Header.Resolution = ExtractLine(17+offset);
+                Spectrum.Header.InstrumentParameters = ExtractLine(24+offset);
+                Spectrum.Header.DetectorChange = ParseToDouble(ExtractLine(41+offset));
+                Spectrum.Header.LampChange = ParseToDouble(ExtractLine(42+offset));
             }
+        }
+
+        private List<string> ParseFreeComments(int offset)
+        {
+            List<string> comments = new List<string>();
+            for (int i = 0; i < offset; i++)
+            {
+                comments.Add(ExtractLine(i + 14));
+            }
+            return comments;
         }
 
         private SpectralType EstimateTypeOfSpectrum()

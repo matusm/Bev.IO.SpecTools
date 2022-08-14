@@ -11,6 +11,7 @@ namespace Bev.IO.SpectrumPod
         public string SpectrometerModel = string.Empty;
         public string SpectrometerSerialNumber = string.Empty;
         public string SoftwareID = string.Empty;
+        public string[] FreeComments = new string[0];       // avoid returning null 
         // JCAMP-DX 4.24 specific properties
         public string Title = string.Empty;                 // JCAMP-DX required! original filename? sample description
         public string DataType => ToJcampDataType(Type);    // JCAMP-DX required! INFRARED SPECTRUM, UV/VIS SPECTRUM, RAMAN SPECTRUM , ...
