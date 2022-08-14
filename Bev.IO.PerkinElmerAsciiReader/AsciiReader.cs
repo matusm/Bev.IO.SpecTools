@@ -6,6 +6,9 @@ namespace Bev.IO.PerkinElmerAsciiReader
 {
     public class AsciiReader
     {
+        private readonly string[] lines; // the complete file as text lines
+        private string[] signatureTokens = new string[6];
+
         public Spectrum Spectrum { get; private set; }
         public PeFileSignature FileSignature { get; }
 
@@ -13,10 +16,21 @@ namespace Bev.IO.PerkinElmerAsciiReader
         {
             lines = textLines;
             Spectrum = new Spectrum();
+            signatureTokens = SplitSignatureLine(lines[0]);
             FileSignature = GetFileSignature();
             ParseSpectralData();
             ParseSpectralHeader();
-            ParseParameters();
+            ParseUnitNames();
+        }
+
+        private string[] SplitSignatureLine(string signature)
+        {
+            string[] sigTok = new string[6];
+            if (signature.Length < 72)
+                return sigTok;
+            for (int i = 0; i < sigTok.Length; i++)
+                sigTok[i] = signature.Substring(i*12, 12);
+            return sigTok;
         }
 
         private PeFileSignature GetFileSignature()
@@ -34,17 +48,17 @@ namespace Bev.IO.PerkinElmerAsciiReader
             if ((iData - iUnits) != 11)
                 return PeFileSignature.InValid;
             // check magic bytes
-            if(!lines[0].Contains("PE"))
+            if (!signatureTokens[0].Contains("PE"))
                 return PeFileSignature.InValid;
-            if (!lines[0].Contains("ASCII"))
+            if (!signatureTokens[2].Contains("SPECTRUM"))
                 return PeFileSignature.InValid;
-            if (!lines[0].Contains("SPECTRUM"))
+            if (!signatureTokens[3].Contains("ASCII"))
                 return PeFileSignature.InValid;
-            if (!lines[0].Contains("PEDS"))
+            if (!signatureTokens[4].Contains("PEDS"))
                 return PeFileSignature.InValid;
-            if (lines[0].Contains("1.60"))
+            if (signatureTokens[5].Contains("1.60"))
                 return PeFileSignature.ValidVer160;
-            if (lines[0].Contains("4.00"))
+            if (signatureTokens[5].Contains("4.00"))
                 return PeFileSignature.ValidVer400;
             return PeFileSignature.Valid;
         }
@@ -53,31 +67,51 @@ namespace Bev.IO.PerkinElmerAsciiReader
         {
             if (FileIsInvalid())
                 return;
+            Spectrum.Header.Type = EstimateTypeOfSpectrum();
+            Spectrum.Header.SourceReference = ExtractLine(2); // original filename
             Spectrum.Header.MeasurementDate = CreationDate();
             Spectrum.Header.ModificationDate = ModificationDate();
             Spectrum.Header.Owner = ExtractLine(7);
             Spectrum.Header.SampleDescription = ExtractLine(8);
-            Spectrum.Header.SpectrometerModel = ExtractLine(11);
-            Spectrum.Header.SpectrometerSerialNumber = ExtractLine(12);
-            Spectrum.Header.SoftwareID = ExtractLine(13);
-            Spectrum.Header.SpectrometerSystem = EstimateSpectrometerSystem();
+            if (FileSignature == PeFileSignature.ValidVer400)
+            {
+                Spectrum.Header.SpectrometerModel = ExtractLine(11);
+                Spectrum.Header.SpectrometerSerialNumber = ExtractLine(12);
+                Spectrum.Header.SpectrometerSystem = EstimateSpectrometerSystem();
+                Spectrum.Header.SoftwareID = ExtractLine(13);
+                Spectrum.Header.Resolution = ExtractLine(17);
+                Spectrum.Header.InstrumentParameters = ExtractLine(24);
+                Spectrum.Header.DetectorChange = ParseToDouble(ExtractLine(41));
+                Spectrum.Header.LampChange = ParseToDouble(ExtractLine(42));
+            }
+        }
+
+        private SpectralType EstimateTypeOfSpectrum()
+        {
+            if (signatureTokens[0].Contains("PE UV"))
+                return SpectralType.UvVis;
+            if (signatureTokens[0].Contains("PE FL")) // fluorescence?
+                return SpectralType.UvVis;
+            if (signatureTokens[0].Contains("PE IR"))
+                return SpectralType.Infrared;
+            return SpectralType.Unknown;
         }
 
         private string EstimateSpectrometerSystem()
         {
-            string conjunction = " SN:";
+            string snPrefix = " SN:";
             if (string.IsNullOrWhiteSpace(Spectrum.Header.SpectrometerSerialNumber))
-                conjunction = string.Empty;
-            return $"{Spectrum.Header.SpectrometerModel}{conjunction}{Spectrum.Header.SpectrometerSerialNumber}".Trim();
+                snPrefix = string.Empty;
+            return $"{Spectrum.Header.SpectrometerModel}{snPrefix}{Spectrum.Header.SpectrometerSerialNumber}".Trim();
         }
 
-        private void ParseParameters()
+        private void ParseUnitNames()
         {
             if (FileIsInvalid())
                 return;
             int index = GetIndexOfUnits();
             Spectrum.SetUnitNames(ExtractLine(index + 1), ExtractLine(index + 2));
-            // this is for test puposes only
+            // this is for debug puposes only
             double value1 = ParseToDouble(ExtractLine(index + 3)); // unknown (1.0)
             double value2 = ParseToDouble(ExtractLine(index + 4)); // unknown (0.0)
             double value3 = ParseToDouble(ExtractLine(index + 5)); // FirstX of source data
@@ -148,11 +182,12 @@ namespace Bev.IO.PerkinElmerAsciiReader
             return double.NaN;
         }
 
-        private string ExtractLine(int lineNumber)
+        private string ExtractLine(int lineNumber) // lineNumber is zero-based! 
         {
             if (lines == null) return string.Empty;
             if (lineNumber >= lines.Length) return string.Empty;
-            return lines[lineNumber].Trim(); //TODO really?
+            if (lineNumber < 0) return string.Empty;
+            return lines[lineNumber].Trim(); //TODO really trimming?
         }
 
         private int GetIndexOfData() => GetIndexOfKey("#DATA");
@@ -187,7 +222,7 @@ namespace Bev.IO.PerkinElmerAsciiReader
             return true;
         }
 
-        private string[] lines;
+
     }
 
     public enum PeFileSignature

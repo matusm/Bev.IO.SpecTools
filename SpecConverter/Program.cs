@@ -25,15 +25,15 @@ namespace SpecConverter
             foreach (string fn in filenames)
             {
                 Spectrum spec = ProcessFile(fn);
-                spec.Header.Type = SpectralType.UvVis;
-                spec.Header.Title = spec.Header.SampleDescription;
-                spec.Header.SourceReference = Path.GetFileName(fn);
-                spec.Header.Origin = $"{appName} {appVersion}";
-                spec.Header.XLabel = "Wavelength / nm";
-                spec.Header.YLabel = "Transmittance / %";
+                //spec.Header.Type = SpectralType.UvVis;
+                //spec.Header.Title = spec.Header.SampleDescription;
+                //spec.Header.SourceReference = Path.GetFileName(fn);
+                //spec.Header.Origin = $"{appName} {appVersion}";
+                //spec.Header.XLabel = "Wavelength / nm";
+                //spec.Header.YLabel = "Transmittance / %";
 
-                JcampWriter jw = new JcampWriter(spec);
-                Console.WriteLine(jw.GetDataRecords());
+                //JcampWriter jw = new JcampWriter(spec);
+                //Console.WriteLine(jw.GetDataRecords());
 
             }
 
@@ -47,6 +47,7 @@ namespace SpecConverter
 
             Console.WriteLine($"Filename:              {filename}");
             Console.WriteLine($"File signature:        {aReader.FileSignature}");
+            Console.WriteLine($"SpectrumDataType:      {spectrum.Header.DataType}");
             Console.WriteLine($"spectrum.AbscissaType: {spectrum.AbscissaType}");
             Console.WriteLine($"Spectrum.FirstX:       {spectrum.FirstX}");
             Console.WriteLine($"Spectrum.LastX:        {spectrum.LastX}");
@@ -67,8 +68,13 @@ namespace SpecConverter
             Console.WriteLine($"SpectrometerSN:        {spectrum.Header.SpectrometerSerialNumber}");
             Console.WriteLine($"SpectrometerSystem:    {spectrum.Header.SpectrometerSystem}");
             Console.WriteLine($"Title:                 {spectrum.Header.Title}");
-            Console.WriteLine();
+            Console.WriteLine($"SoftwareID:            {spectrum.Header.SoftwareID}");
+            Console.WriteLine($"Resolution:            {spectrum.Header.Resolution}");
+            Console.WriteLine($"InstrumentParameters:  {spectrum.Header.InstrumentParameters}");
+            Console.WriteLine($"DetectorChange:        {spectrum.Header.DetectorChange}");
+            Console.WriteLine($"LampChange:            {spectrum.Header.LampChange}");
             Console.WriteLine("=========================================================");
+
 
             return spectrum;
         }

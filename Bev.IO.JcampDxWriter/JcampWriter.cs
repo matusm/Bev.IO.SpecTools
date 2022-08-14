@@ -31,7 +31,7 @@ namespace Bev.IO.JcampDxWriter
             AppendRecord("SAMPLE DESCRIPTION", spectrum.Header.SampleDescription);
             AppendRecord("ORIGIN", spectrum.Header.Origin);
             AppendRecord("OWNER", spectrum.Header.Owner);
-            AppendRecord("CLASS", spectrum.Header.Class);
+            //AppendRecord("CLASS", spectrum.Header.Class);
             AppendRecord("SOURCE REFERENCE", spectrum.Header.SourceReference);
             AppendRecord("CROSS REFERENCE", spectrum.Header.CrossReference);
             AppendRecord("SPECTROMETER/DATA SYSTEM", spectrum.Header.SpectrometerSystem);
