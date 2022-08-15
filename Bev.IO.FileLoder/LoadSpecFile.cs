@@ -1,23 +1,28 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Bev.IO.FileLoader
 {
-    public class SpectralFile
+    public class LoadSpecFile
     {
         public string[] LinesInFile { get; private set; }
+        public string Filename { get; private set; }
 
-        public SpectralFile(string filename)
+        public LoadSpecFile(string filename) : this(filename, Encoding.Default) { }
+
+        public LoadSpecFile(string filename, Encoding encoding)
         {
-            LoadFile(filename);
+            //Encoding.GetEncoding(437) for MS-DOS
+            LoadFile(filename, encoding);
         }
 
-        private void LoadFile(string filename)
+        private void LoadFile(string filename, Encoding encoding)
         {
             try
             {
-                string allText = File.ReadAllText(filename);
+                string allText = File.ReadAllText(filename, encoding);
                 if (string.IsNullOrWhiteSpace(allText))
                 {
                     return;

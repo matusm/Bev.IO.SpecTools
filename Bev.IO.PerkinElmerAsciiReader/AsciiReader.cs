@@ -74,6 +74,7 @@ namespace Bev.IO.PerkinElmerAsciiReader
             Spectrum.Header.ModificationDate = ModificationDate();
             Spectrum.Header.Owner = ExtractLine(7);
             Spectrum.Header.SampleDescription = ExtractLine(8);
+            Spectrum.Header.Title = ExtractLine(8);
             if (FileSignature == PeFileSignature.ValidVer400)
             {
                 int offset = GetIndexOfHdr() - 75; // all lines below #15 are shifted by this amount if multiple comments are added

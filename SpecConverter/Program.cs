@@ -6,6 +6,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace SpecConverter
 {
@@ -41,7 +42,7 @@ namespace SpecConverter
 
         private static Spectrum ProcessFile(string filename)
         {
-            SpectralFile sFile = new SpectralFile(filename);
+            LoadSpecFile sFile = new LoadSpecFile(filename, Encoding.GetEncoding(437));
             AsciiReader aReader = new AsciiReader(sFile.LinesInFile);
             Spectrum spectrum = aReader.Spectrum;
 
