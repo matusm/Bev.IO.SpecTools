@@ -20,7 +20,7 @@ namespace Bev.IO.SpectrumPod
         public double MinX => xStat.MinimumValue;
         public double MaxY => yStat.MaximumValue;
         public double MinY => yStat.MinimumValue;
-        public double DeltaX => (LastX - FirstX) / (Length - 1); // only usefull for equidistant data points
+        public double DeltaX => CalculateDeltaX();
         public string XUnitName { get; private set; } = string.Empty;
         public string YUnitName { get; private set; } = string.Empty;
 
@@ -69,6 +69,13 @@ namespace Bev.IO.SpectrumPod
             if (rangeOfSpacings < epsilon)
                 return SpectralSpacing.FixedSpacing;
             return SpectralSpacing.VariableSpacing;
+        }
+
+        private double CalculateDeltaX()
+        {
+            if (AbscissaType == SpectralSpacing.FixedSpacing)
+                return (LastX - FirstX) / (Length - 1);
+            return double.NaN;
         }
 
         private void SortData(SortOrder sortOrder)

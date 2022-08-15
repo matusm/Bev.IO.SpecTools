@@ -2,17 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 
 namespace Bev.IO.PerkinElmerAsciiReader
 {
     public class AsciiReader
     {
-        private readonly string[] lines; // the complete file as text lines
-        private string[] signatureTokens = new string[6];
+        private readonly string[] lines; // the complete file as a text line array
+        private readonly string[] signatureTokens = new string[6];
 
         public Spectrum Spectrum { get; private set; }
         public PeFileSignature FileSignature { get; }
-
+        public double PeFileVersion => ParseToDouble(signatureTokens[5]);
+ 
         public AsciiReader(string[] textLines)
         {
             lines = textLines;
@@ -72,6 +74,7 @@ namespace Bev.IO.PerkinElmerAsciiReader
             Spectrum.Header.SourceReference = ExtractLine(2); // original filename
             Spectrum.Header.MeasurementDate = CreationDate();
             Spectrum.Header.ModificationDate = ModificationDate();
+            Spectrum.Header.Origin = $"Data parsed by {Assembly.GetExecutingAssembly().GetName().Name} {Assembly.GetExecutingAssembly().GetName().Version}";
             Spectrum.Header.Owner = ExtractLine(7);
             Spectrum.Header.SampleDescription = ExtractLine(8);
             Spectrum.Header.Title = ExtractLine(8);
@@ -87,6 +90,10 @@ namespace Bev.IO.PerkinElmerAsciiReader
                 Spectrum.Header.InstrumentParameters = ExtractLine(24+offset);
                 Spectrum.Header.DetectorChange = ParseToDouble(ExtractLine(41+offset));
                 Spectrum.Header.LampChange = ParseToDouble(ExtractLine(42+offset));
+            }
+            if (FileSignature == PeFileSignature.ValidVer160)
+            {
+                Spectrum.Header.SpectrometerSystem = ExtractLine(20); // really?
             }
         }
 
@@ -134,7 +141,7 @@ namespace Bev.IO.PerkinElmerAsciiReader
             double value6 = ParseToDouble(ExtractLine(index + 8)); // unknown (8)
             double value7 = ParseToDouble(ExtractLine(index + 9)); // MaxY
             double value8 = ParseToDouble(ExtractLine(index + 10));// MinY
-            Console.WriteLine($"#GR - v1:{value1} v2:{value2} v6:{value6}");
+            //Console.WriteLine($"#GR - v1:{value1} v2:{value2} v6:{value6}");
         }
 
         private void ParseSpectralData()
