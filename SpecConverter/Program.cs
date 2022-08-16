@@ -34,10 +34,8 @@ namespace SpecConverter
             LoadSpecFile sFile = new LoadSpecFile(filename);
             AsciiReader aReader = new AsciiReader(sFile.LinesInFile);
             Spectrum spectrum = aReader.Spectrum;
-
-
-            //spectrum.Header.SourceReference = sFile.Filename;
-
+            spectrum.Header.OriginalFileName = sFile.FileName;
+            spectrum.Header.OriginalFileCreationDate = sFile.FileCreationTime;
             //Console.WriteLine($"PE version {aReader.PeFileVersion:F2}");
             //Console.WriteLine($"Filename:              {filename}");
             //Console.WriteLine($"File signature:        {aReader.FileSignature}");

@@ -8,6 +8,8 @@ namespace Bev.IO.SpectrumPod
         public SpectralType Type = SpectralType.Unknown;
         public DateTime MeasurementDate;
         public DateTime ModificationDate;
+        public DateTime OriginalFileCreationDate;
+        public string OriginalFileName = string.Empty;
         public string SpectrometerModel = string.Empty;
         public string SpectrometerSerialNumber = string.Empty;
         public string SoftwareID = string.Empty;
