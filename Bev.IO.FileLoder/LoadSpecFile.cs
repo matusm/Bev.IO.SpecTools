@@ -8,25 +8,26 @@ namespace Bev.IO.FileLoader
     public class LoadSpecFile
     {
         public string[] LinesInFile { get; private set; }
-        public string Filename { get; private set; }
+        public string FileName { get; }
+        public DateTime FileCreationTime { get; }
 
-        public LoadSpecFile(string filename) : this(filename, Encoding.Default) { }
+        public LoadSpecFile(string path) : this(path, Encoding.Default) { }
 
-        public LoadSpecFile(string filename, Encoding encoding)
+        public LoadSpecFile(string path, Encoding encoding)
         {
+            FileName = Path.GetFileName(path);
+            FileCreationTime = File.GetCreationTimeUtc(path);
             //Encoding.GetEncoding(437) for MS-DOS
-            LoadFile(filename, encoding);
+            LoadFile(path, encoding);
         }
 
-        private void LoadFile(string filename, Encoding encoding)
+        private void LoadFile(string path, Encoding encoding)
         {
             try
             {
-                string allText = File.ReadAllText(filename, encoding);
+                string allText = File.ReadAllText(path, encoding);
                 if (string.IsNullOrWhiteSpace(allText))
-                {
                     return;
-                }
                 LinesInFile = Regex.Split(allText, "\r\n|\r|\n");
             }
             catch (Exception)
