@@ -103,6 +103,9 @@ namespace Bev.IO.JcampDxWriter
             OptionalRecord("PRESSURE", spectrum.Header.Pressure);
             OptionalRecord("TEMPERATURE", spectrum.Header.Temperature);
             OptionalRecord("DATAPROCESSING", spectrum.Header.DataProcessing);
+            // file properties
+            OptionalRecord("$FILENAME", spectrum.Header.OriginalFileName);
+            OptionalRecord("$FILECREATIONDATE", spectrum.Header.OriginalFileCreationDate.ToString("yyyy/MM/dd HH:mm:ssK"));
             // Hitachi U3410 specific properties, as used in MM SPC files
             OptionalRecord("$SCANMODE", spectrum.Header.ScanMode);
             OptionalRecord("$DATAMODE", spectrum.Header.DataMode);
