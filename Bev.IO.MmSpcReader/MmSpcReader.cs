@@ -23,7 +23,8 @@ namespace Bev.IO.MmSpcReader
         {
             Spectrum.Header.Type = EstimateTypeOfSpectrum();
             Spectrum.Header.Origin = $"Data parsed by {Assembly.GetExecutingAssembly().GetName().Name} {Assembly.GetExecutingAssembly().GetName().Version}";
-
+            Spectrum.Header.SampleDescription = ExtractLine(1);
+            Spectrum.Header.FreeComments = GetFreeComments(2, GetIndexOfData());
         }
 
         private void ParseSpectralData()
@@ -36,6 +37,16 @@ namespace Bev.IO.MmSpcReader
                 SpectralPoint tupel = ParseToTupel(lines[i]);
                 if (tupel.IsValid) Spectrum.AddValue(tupel);
             }
+        }
+
+        private string[] GetFreeComments(int fromIndex, int toIndex)
+        {
+            List<string> commentLines = new List<string>();
+            for (int i = fromIndex; i < toIndex; i++)
+            {
+                commentLines.Add(ExtractLine(i));
+            }
+            return commentLines.ToArray();
         }
 
         private SpectralType EstimateTypeOfSpectrum()
@@ -76,6 +87,14 @@ namespace Bev.IO.MmSpcReader
                     return i;
             }
             return -1; //TODO
+        }
+
+        private string ExtractLine(int lineNumber) // lineNumber is zero-based! 
+        {
+            if (lines == null) return string.Empty;
+            if (lineNumber >= lines.Length) return string.Empty;
+            if (lineNumber < 0) return string.Empty;
+            return lines[lineNumber].Trim(); //TODO really trimming?
         }
 
     }

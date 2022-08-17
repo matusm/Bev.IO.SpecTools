@@ -2,6 +2,7 @@
 using Bev.IO.PerkinElmerAsciiReader;
 using Bev.IO.SpectrumPod;
 using Bev.IO.JcampDxWriter;
+using Bev.IO.MmSpcReader;
 using System;
 using System.Globalization;
 using System.IO;
@@ -17,16 +18,27 @@ namespace SpecConverter
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             string workingDirectory = Directory.GetCurrentDirectory();
-            string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
+            string[] filenames = Directory.GetFiles(workingDirectory, @"*.spc");
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
             {
-                Spectrum spectrum = ProcessAsciiFile(fn);
+                Spectrum spectrum = ProcessMmSpcFile(fn);
+                //Spectrum spectrum = ProcessAsciiFile(fn);
                 JcampWriter jw = new JcampWriter(spectrum);
                 Console.WriteLine(jw.GetRecord());
             }
 
+        }
+
+        private static Spectrum ProcessMmSpcFile(string filename)
+        {
+            LoadSpecFile sFile = new LoadSpecFile(filename, Encoding.GetEncoding(437));
+            MmSpcReader sReader = new MmSpcReader(sFile.LinesInFile);
+            Spectrum spectrum = sReader.Spectrum;
+            spectrum.Header.OriginalFileName = sFile.FileName;
+            spectrum.Header.OriginalFileCreationDate = sFile.FileCreationTime;
+            return spectrum;
         }
 
         private static Spectrum ProcessAsciiFile(string filename)

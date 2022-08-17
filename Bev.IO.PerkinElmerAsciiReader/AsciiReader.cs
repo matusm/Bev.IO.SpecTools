@@ -243,7 +243,6 @@ namespace Bev.IO.PerkinElmerAsciiReader
             return true;
         }
 
-
     }
 
     public enum PeFileSignature

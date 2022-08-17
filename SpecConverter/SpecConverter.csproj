@@ -39,6 +39,9 @@
     <Reference Include="Bev.IO.JcampDxWriter">
       <HintPath>..\Bev.IO.JcampDxWriter\bin\Release\Bev.IO.JcampDxWriter.dll</HintPath>
     </Reference>
+    <Reference Include="Bev.IO.MmSpcReader">
+      <HintPath>..\Bev.IO.MmSpcReader\bin\Release\Bev.IO.MmSpcReader.dll</HintPath>
+    </Reference>
     <Reference Include="Bev.IO.PerkinElmerAsciiReader">
       <HintPath>..\Bev.IO.PerkinElmerAsciiReader\bin\Release\Bev.IO.PerkinElmerAsciiReader.dll</HintPath>
     </Reference>
