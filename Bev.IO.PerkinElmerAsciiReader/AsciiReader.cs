@@ -88,8 +88,13 @@ namespace Bev.IO.PerkinElmerAsciiReader
                 Spectrum.Header.SoftwareID = ExtractLine(13);
                 Spectrum.Header.Resolution = ExtractLine(17+offset);
                 Spectrum.Header.InstrumentParameters = ExtractLine(24+offset);
-                Spectrum.Header.DetectorChange = ParseToDouble(ExtractLine(41+offset));
+                Spectrum.Header.MonochromatorChange = ExtractLine(41+offset);
                 Spectrum.Header.LampChange = ParseToDouble(ExtractLine(42+offset));
+                Spectrum.Header.DetectorChange = ExtractLine(43 + offset);
+                Spectrum.Header.SampleBeamPosition = ExtractLine(44 + offset);
+                Spectrum.Header.CommonBeamMask = ExtractLine(45 + offset);
+                Spectrum.Header.CommonBeamDepolarizer = ExtractLine(46 + offset);
+                Spectrum.Header.Attenuators = ExtractLine(47 + offset);
             }
             if (FileSignature == PeFileSignature.ValidVer160)
             {

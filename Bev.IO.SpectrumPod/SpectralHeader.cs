@@ -34,6 +34,20 @@ namespace Bev.IO.SpectrumPod
         public string Resolution = string.Empty;            // JCAMP-DX optional. // also for Raman SPC
         public string XLabel = string.Empty;                // JCAMP-DX optional.
         public string YLabel = string.Empty;                // JCAMP-DX optional.
+        // PerkinElmer Lambda 1050+ specific properties
+        public string Lamps;
+        public string Accessories;
+        public string UvVisSlitMode;
+        public string NirSlitMode;
+        public string NirSlitWidth;
+        public string UvVisIntegrationTime;
+        public string NirIntegrationTime;
+        public string NirGain;
+        public string MonochromatorChange;
+        public string SampleBeamPosition;
+        public string CommonBeamMask;
+        public string CommonBeamDepolarizer;
+        public string Attenuators;
         // Hitachi U3410 specific properties, as used in MM SPC files
         public string ScanMode;                     // scan/Time/Rep
         public string DataMode;                     // %T/Abs/SB
@@ -44,7 +58,7 @@ namespace Bev.IO.SpectrumPod
         public string NirBandpassMode;              // fix/servo
         public double NirPbSGain = double.NaN;      // 1
         public string LightSource;                  // Auto/W/D2
-        public double DetectorChange = double.NaN;  // 840 nm
+        public string DetectorChange;               // 840 nm
         public double LampChange = double.NaN;      // 340 nm
         public string Response;                     // fast/medium/slow
         public double HvGain = double.NaN;          // 200
