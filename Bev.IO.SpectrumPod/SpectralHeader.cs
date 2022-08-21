@@ -1,15 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Bev.IO.SpectrumPod
 {
     public class SpectralHeader
     {
-        // generic properties
+        public Dictionary<string, HeaderParameter> Parameters = new Dictionary<string, HeaderParameter>();
+
+        // special properties
         public SpectralType Type = SpectralType.Unknown;
         public DateTime MeasurementDate;
         public DateTime ModificationDate;
         public DateTime OriginalFileCreationDate;
         public string OriginalFileName = string.Empty;
+
+        public SpectralHeader()
+        {
+            PopulateJcampRequiredProperties();
+        }
+
         public string SpectrometerModel = string.Empty;
         public string SpectrometerSerialNumber = string.Empty;
         public string SoftwareID = string.Empty;
@@ -75,6 +84,87 @@ namespace Bev.IO.SpectrumPod
         //
         // Dilor XY Dreifachmonochromator, N2 cooled CCD
         // f = 60 cm, 1800 mm-1
+
+        private void PopulateJcampRequiredProperties()
+        {
+            SetRequiredParameter("Title", string.Empty);                 // JCAMP-DX required! original filename? sample description
+            SetRequiredParameter("JCAMP-DX", "4.24");
+            SetRequiredParameter("DataType", string.Empty);              // TODO JCAMP-DX required! INFRARED SPECTRUM, UV/VIS SPECTRUM, RAMAN SPECTRUM , ...
+            SetRequiredParameter("Origin", string.Empty);                // JCAMP-DX required! ??? Exported PE Spectrum Data File, BEV
+            SetRequiredParameter("Owner", string.Empty);                 // JCAMP-DX required! person who made the measurement 
+            SetOptionalParameter("SpectrometerSystem", string.Empty);    // JCAMP-DX optional! model + serial number
+            SetOptionalParameter("InstrumentParameters", string.Empty);  // JCAMP-DX optional! many - how to select?
+            SetOptionalParameter("SampleDescription", string.Empty);     // JCAMP-DX optional! important
+            SetOptionalParameter("Concentrations", string.Empty);        // JCAMP-DX optional!
+            SetOptionalParameter("SamplingProcedure", string.Empty);     // JCAMP-DX optional!
+            SetOptionalParameter("State", string.Empty);                 // JCAMP-DX optional! eg glass filter
+            SetOptionalParameter("PathLength", string.Empty);            // JCAMP-DX optional!
+            SetOptionalParameter("Pressure", string.Empty);              // JCAMP-DX optional!
+            SetOptionalParameter("Temperature", string.Empty);           // JCAMP-DX optional! -> filter temperature?
+            SetOptionalParameter("DataProcessing", string.Empty);        // JCAMP-DX optional. -> none or from software
+            SetOptionalParameter("SourceReference", string.Empty);       // JCAMP-DX optional. -> original filename !
+            SetOptionalParameter("CrossReference", string.Empty);        // JCAMP-DX optional.
+            SetOptionalParameter("Resolution", string.Empty);            // JCAMP-DX optional. // also for Raman SPC
+            SetOptionalParameter("XLabel", string.Empty);                // JCAMP-DX optional.
+            SetOptionalParameter("YLabel", string.Empty);                // JCAMP-DX optional.
+        }
+
+        public void SetOptionalParameter(string key, string value)
+        {
+            Parameters[key.Trim()] = new HeaderParameter(value);
+        }
+
+        public void SetRequiredParameter(string key, string value)
+        {
+            Parameters[key.Trim()] = new HeaderParameter(value, true);
+        }
+
+        public string GetParameter(string key)
+        {
+            // TODO implement special cases
+            try
+            {
+                return Parameters[key].Value; // does not work with beautified keys!
+            }
+            catch (KeyNotFoundException)
+            {
+                return string.Empty;
+            }
+        }
+
+        public void PopulateComputedProperties()
+        {
+            SetRequiredParameter("DataType", ToJcampDataType(Type));
+            SetRequiredParameter("Length", 0.ToString());
+
+        }
+
+        public void BeautifyKeys(bool toUpper)
+        {
+            int maxKeyLength = GetMaximumKeyLength();
+            foreach (var k in Parameters.Keys)
+            {
+                string bKey = GetBeautifiedKey(k, maxKeyLength, toUpper);
+                Parameters[k].PrettyKey = bKey;
+            }
+        }
+
+
+        private string GetBeautifiedKey(string key, int maximumKeyLength, bool toUpper)
+        {
+            string beautyString = key.PadRight(maximumKeyLength);
+            if (toUpper) beautyString.ToUpperInvariant();
+            return beautyString;
+        }
+
+        private int GetMaximumKeyLength() 
+        {
+            // determine the length of the longest (trimmed) key
+            int maxKeyLength = 0;
+            foreach (string k in Parameters.Keys)
+                if (k.Length > maxKeyLength) maxKeyLength = k.Length;
+            return maxKeyLength;
+        }
 
         private string ToJcampDataType(SpectralType type)
         {

@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HeaderParameter.cs" />
     <Compile Include="SpectralHeader.cs" />
     <Compile Include="SpectralPoint.cs" />
     <Compile Include="Spectrum.cs" />

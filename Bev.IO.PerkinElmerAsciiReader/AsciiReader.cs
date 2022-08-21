@@ -159,7 +159,7 @@ namespace Bev.IO.PerkinElmerAsciiReader
             for (int i = startIndex; i < lines.Length; i++)
             {
                 SpectralPoint tupel = ParseToTupel(lines[i]);
-                if (tupel.IsValid) Spectrum.AddValue(tupel);
+                if (tupel.IsValid) Spectrum.AddDataValue(tupel);
             }
         }
 
