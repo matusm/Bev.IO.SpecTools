@@ -10,12 +10,12 @@ namespace Bev.IO.SpectrumPod
         // Actual spectrum 
         public SpectralPoint[] Data => spectralData.ToArray();
         // Meta data for spectrum
-        public Dictionary<string, HeaderParameter> MetaData = new Dictionary<string, HeaderParameter>();
+        private MetaData Header = new MetaData();
         // User supplied meta data
         public SpectralType Type = SpectralType.Unknown;
-        public DateTime MeasurementDate;
-        public DateTime ModificationDate;
-        public DateTime OriginalFileCreationDate;
+        public DateTime? MeasurementDate;
+        public DateTime? ModificationDate;
+        public DateTime? OriginalFileCreationDate;
         public string OriginalFileName = string.Empty;
         public string XUnitName { get; private set; } = string.Empty;
         public string YUnitName { get; private set; } = string.Empty;
@@ -32,13 +32,11 @@ namespace Bev.IO.SpectrumPod
         public double MinY => yStat.MinimumValue;
         public double DeltaX => CalculateDeltaX();
 
-
         public Spectrum() : this(SortOrder.Ascending){}
 
         public Spectrum(SortOrder sortOrder)
         {
             this.sortOrder = sortOrder;
-            PopulateJcampMetaData();
         }
 
         public void SetUnitNames(string forX, string forY)
@@ -97,91 +95,34 @@ namespace Bev.IO.SpectrumPod
             spectralData.Reverse();
         }
 
-        private void PopulateJcampMetaData()
-        {
-            SetRequiredMetaData("Title");                 // JCAMP-DX required! original filename? sample description
-            SetRequiredMetaData("JCAMP-DX", "4.24");
-            SetRequiredMetaData("DataType");              // TODO JCAMP-DX required! INFRARED SPECTRUM, UV/VIS SPECTRUM, RAMAN SPECTRUM , ...
-            SetRequiredMetaData("Origin");                // JCAMP-DX required! ??? Exported PE Spectrum Data File, BEV
-            SetRequiredMetaData("Owner");                 // JCAMP-DX required! person who made the measurement 
-            SetOptionalMetaData("SpectrometerSystem");    // JCAMP-DX optional! model + serial number
-            SetOptionalMetaData("InstrumentParameters");  // JCAMP-DX optional! many - how to select?
-            SetOptionalMetaData("SampleDescription");     // JCAMP-DX optional! important
-            SetOptionalMetaData("Concentrations");        // JCAMP-DX optional!
-            SetOptionalMetaData("SamplingProcedure");     // JCAMP-DX optional!
-            SetOptionalMetaData("State");                 // JCAMP-DX optional! eg glass filter
-            SetOptionalMetaData("PathLength");            // JCAMP-DX optional!
-            SetOptionalMetaData("Pressure");              // JCAMP-DX optional!
-            SetOptionalMetaData("Temperature");           // JCAMP-DX optional! -> filter temperature?
-            SetOptionalMetaData("DataProcessing");        // JCAMP-DX optional. -> none or from software
-            SetOptionalMetaData("SourceReference");       // JCAMP-DX optional. -> original filename !
-            SetOptionalMetaData("CrossReference");        // JCAMP-DX optional.
-            SetOptionalMetaData("Resolution");            // JCAMP-DX optional. // also for Raman SPC
-            SetOptionalMetaData("XLabel");                // JCAMP-DX optional.
-            SetOptionalMetaData("YLabel");                // JCAMP-DX optional.
-        }
-
         private void PopulateJcampComputedMetaData()
         {
-            // TODO dates
-            SetRequiredMetaData("DataType", ToJcampDataType(Type));
-            SetRequiredMetaData("Length", Length.ToString());
-            SetRequiredMetaData("FirstX", FirstX.ToString());
-            SetRequiredMetaData("LastX", LastX.ToString());
-            SetRequiredMetaData("FirstY", FirstY.ToString());
-            SetRequiredMetaData("LastY", LastY.ToString());
-            SetRequiredMetaData("MaxX", MaxX.ToString());
-            SetRequiredMetaData("MinX", MinX.ToString());
-            SetRequiredMetaData("MaxY", MaxY.ToString());
-            SetRequiredMetaData("MinY", MinY.ToString());
-            if(!double.IsNaN(DeltaX)) 
-                SetOptionalMetaData("DeltaX", DeltaX.ToString());
-            SetRequiredMetaData("XUnit", XUnitName);
-            SetRequiredMetaData("YUnit", YUnitName);
-        }
-
-        public void SetOptionalMetaData(string key, string value)
-        {
-            string trimmedKey = key.Trim();
-            MetaData[trimmedKey] = new HeaderParameter(value, false);
-            MetaData[trimmedKey].PrettyKey = trimmedKey;
-        }
-
-        public void SetOptionalMetaData(string key) => SetOptionalMetaData(key, string.Empty);
-
-        public void SetRequiredMetaData(string key, string value)
-        {
-            string trimmedKey = key.Trim();
-            MetaData[trimmedKey] = new HeaderParameter(value, true);
-            MetaData[trimmedKey].PrettyKey = trimmedKey;
-        }
-
-        public void SetRequiredMetaData(string key) => SetRequiredMetaData(key, string.Empty);
-
-        public void BeautifyKeys(bool toUpper)
-        {
-            int maxKeyLength = GetMaximumKeyLength();
-            foreach (var k in MetaData.Keys)
+            Header.SetMetaData("OriginalFileName", OriginalFileName);
+            if (MeasurementDate.HasValue)
             {
-                string bKey = GetBeautifiedKey(k, maxKeyLength, toUpper);
-                MetaData[k].PrettyKey = bKey;
+                Header.SetJcampRequiredMetaData("Date", MeasurementDate.Value.ToString("yy/MM/dd"));
+                Header.SetJcampRequiredMetaData("Time", MeasurementDate.Value.ToString("HH:mm:ss"));
+                Header.SetMetaData("Long Date", MeasurementDate.Value.ToString("yyyy/MM/dd HH:mm:ssK"));
+                Header.SetMetaData("MeasurementDate", MeasurementDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
             }
-        }
-
-        private string GetBeautifiedKey(string key, int maximumKeyLength, bool toUpper)
-        {
-            string beautyString = key.PadRight(maximumKeyLength);
-            if (toUpper) beautyString.ToUpperInvariant();
-            return beautyString;
-        }
-
-        private int GetMaximumKeyLength()
-        {
-            // determine the length of the longest (trimmed) key
-            int maxKeyLength = 0;
-            foreach (string k in MetaData.Keys)
-                if (k.Length > maxKeyLength) maxKeyLength = k.Length;
-            return maxKeyLength;
+            if(ModificationDate.HasValue)
+                Header.SetMetaData("ModificationDate", ModificationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
+            if (OriginalFileCreationDate.HasValue)
+                Header.SetMetaData("OriginalFileCreationDate", OriginalFileCreationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
+            Header.SetJcampRequiredMetaData("DataType", ToJcampDataType(Type));
+            Header.SetJcampRequiredMetaData("Length", Length.ToString());
+            Header.SetJcampRequiredMetaData("FirstX", FirstX.ToString());
+            Header.SetJcampRequiredMetaData("LastX", LastX.ToString());
+            Header.SetJcampRequiredMetaData("FirstY", FirstY.ToString());
+            Header.SetJcampMetaData("LastY", LastY.ToString());
+            Header.SetJcampMetaData("MaxX", MaxX.ToString());
+            Header.SetJcampMetaData("MinX", MinX.ToString());
+            Header.SetJcampMetaData("MaxY", MaxY.ToString());
+            Header.SetJcampMetaData("MinY", MinY.ToString());
+            if(!double.IsNaN(DeltaX))
+                Header.SetJcampMetaData("DeltaX", DeltaX.ToString());
+            Header.SetJcampRequiredMetaData("XUnits", XUnitName);
+            Header.SetJcampRequiredMetaData("YUnits", YUnitName);
         }
 
         private string ToJcampDataType(SpectralType type)
@@ -205,8 +146,6 @@ namespace Bev.IO.SpectrumPod
             }
         }
 
-
-
         private const double epsilon = 0.000001; // TODO works for Perkin Elmer spectrophotometer ascii files
         private readonly List<SpectralPoint> spectralData = new List<SpectralPoint>();
         private readonly SortOrder sortOrder;
@@ -226,5 +165,15 @@ namespace Bev.IO.SpectrumPod
         None,
         Ascending,
         Descending
+    }
+
+    public enum SpectralType
+    {
+        Unknown,
+        Raman,
+        Infrared,
+        UvVis,
+        Nmr,
+        Mass
     }
 }

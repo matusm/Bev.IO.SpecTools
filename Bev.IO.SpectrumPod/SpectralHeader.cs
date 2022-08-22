@@ -5,7 +5,7 @@ namespace Bev.IO.SpectrumPod
 {
     public class SpectralHeader
     {
-        public Dictionary<string, HeaderParameter> Parameters = new Dictionary<string, HeaderParameter>();
+        public Dictionary<string, HeaderEntry> Parameters = new Dictionary<string, HeaderEntry>();
 
         // special properties
         public SpectralType Type = SpectralType.Unknown;
@@ -145,7 +145,7 @@ namespace Bev.IO.SpectrumPod
             foreach (var k in Parameters.Keys)
             {
                 string bKey = GetBeautifiedKey(k, maxKeyLength, toUpper);
-                Parameters[k].PrettyKey = bKey;
+                Parameters[k].PrettyLabel = bKey;
             }
         }
 
@@ -189,13 +189,5 @@ namespace Bev.IO.SpectrumPod
 
     }
 
-    public enum SpectralType
-    {
-        Unknown,
-        Raman,
-        Infrared,
-        UvVis,
-        Nmr,
-        Mass
-    }
+
 }
