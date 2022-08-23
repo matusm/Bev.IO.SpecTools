@@ -1,4 +1,5 @@
-﻿using Bev.IO.SpectrumPod;
+﻿using Bev.IO.FileLoader;
+using Bev.IO.SpectrumPod;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -24,6 +25,12 @@ namespace Bev.IO.PerkinElmerAsciiReader
             ParseSpectralData();
             ParseSpectralHeader();
             ParseUnitNames();
+        }
+
+        public AsciiReader(LoadSpecFile file) : this (file.LinesInFile)
+        {
+            Spectrum.SourceFileName = file.FileName;
+            Spectrum.SourceFileCreationDate = file.FileCreationTime;
         }
 
         private string[] SplitSignatureLine(string signature)

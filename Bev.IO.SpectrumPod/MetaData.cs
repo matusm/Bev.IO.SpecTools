@@ -5,7 +5,7 @@ namespace Bev.IO.SpectrumPod
 {
     public class MetaData
     {
-        private Dictionary<string, HeaderEntry> metaDataDictonary = new Dictionary<string, HeaderEntry>();
+        private readonly Dictionary<string, HeaderRecord> metaDataDictonary = new Dictionary<string, HeaderRecord>();
 
         public MetaData()
         {
@@ -32,38 +32,34 @@ namespace Bev.IO.SpectrumPod
                 metaDataDictonary[trimmedKey].Value = value;
                 return;
             }
-            metaDataDictonary[trimmedKey] = new HeaderEntry(value, isJcamp, isRequired);
-            metaDataDictonary[trimmedKey].PrettyLabel = trimmedKey;
+            metaDataDictonary[trimmedKey] = new HeaderRecord(value, isJcamp, isRequired);
+            metaDataDictonary[trimmedKey].PlainLabel = trimmedKey;
         }
 
-        public void BeautifyLabels(bool toUpper)
+        public string ToKVString(bool justify)
         {
-            int maxKeyLength = GetMaximumKeyLength();
-            foreach (var k in metaDataDictonary.Keys)
-            {
-                string bKey = GetBeautifiedLabel(k, maxKeyLength, toUpper);
-                metaDataDictonary[k].PrettyLabel = bKey;
-            }
-        }
-
-        public string ToKVString()
-        {
+            int totalLabelWidth = -1; // do not justify GetMaximumKeyLength();
+            if (justify)
+                totalLabelWidth = GetMaximumKeyLength();
             StringBuilder sb = new StringBuilder();
-            foreach (var entry in metaDataDictonary)
+            foreach (KeyValuePair<string, HeaderRecord> entry in metaDataDictonary)
             {
-                if(entry.Value.IsFull)
-                    sb.AppendLine(entry.Value.ToKVString());
+                if(entry.Value.IsFull && !EntryIsObsoleteForKV(entry.Key))
+                    sb.AppendLine(entry.Value.ToKVString(totalLabelWidth));
             }
             return sb.ToString();
         }
 
-        public string ToJcampString()
+        public string ToJcampString(bool justify)
         {
+            int totalLabelWidth = -1; // do not justify GetMaximumKeyLength();
+            if (justify)
+                totalLabelWidth = GetMaximumKeyLength();
             StringBuilder sb = new StringBuilder();
             foreach (var entry in metaDataDictonary)
             {
                 if (entry.Value.IsFull || entry.Value.IsRequired)
-                    sb.AppendLine(entry.Value.ToJcampString());
+                    sb.AppendLine(entry.Value.ToJcampString(totalLabelWidth));
             }
             return sb.ToString();
         }
@@ -94,13 +90,6 @@ namespace Bev.IO.SpectrumPod
             SetJcampRequiredMetaData("YFactor");                // JCAMP-DX required!
         }
 
-        private string GetBeautifiedLabel(string key, int maximumKeyLength, bool toUpper)
-        {
-            string beautyString = key.PadRight(maximumKeyLength);
-            if (toUpper) beautyString.ToUpperInvariant();
-            return beautyString;
-        }
-
         private int GetMaximumKeyLength()
         {
             // determine the length of the longest (trimmed) key
@@ -108,6 +97,15 @@ namespace Bev.IO.SpectrumPod
             foreach (string k in metaDataDictonary.Keys)
                 if (k.Length > maxKeyLength) maxKeyLength = k.Length;
             return maxKeyLength;
+        }
+
+        private readonly string[] obsoleteKeys = { "JCAMP-DX", "Date", "Time", "Long Date", "SpectrometerSystem" };
+
+        private bool EntryIsObsoleteForKV(string key)
+        {
+            foreach (var s in obsoleteKeys)
+                if (key == s) return true;
+            return false;
         }
 
     }

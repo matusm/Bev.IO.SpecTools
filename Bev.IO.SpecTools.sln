@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.JcampDxWriter", "Bev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.MmSpcReader", "Bev.IO.MmSpcReader\Bev.IO.MmSpcReader.csproj", "{31E6B202-AC34-4202-A362-0D6C213F706D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.MmSpcWriter", "Bev.IO.MmSpcWriter\Bev.IO.MmSpcWriter.csproj", "{6A6374B2-06B2-4D52-AB24-B8F0D9814712}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

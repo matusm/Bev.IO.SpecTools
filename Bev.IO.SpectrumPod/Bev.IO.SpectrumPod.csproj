@@ -44,9 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HeaderEntry.cs" />
+    <Compile Include="HeaderRecord.cs" />
     <Compile Include="MetaData.cs" />
-    <Compile Include="SpectralHeader.cs" />
     <Compile Include="SpectralPoint.cs" />
     <Compile Include="Spectrum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

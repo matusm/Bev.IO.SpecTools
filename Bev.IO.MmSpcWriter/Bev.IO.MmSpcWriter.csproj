@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{947287EA-82AC-45ED-81BF-661775912AC1}</ProjectGuid>
+    <ProjectGuid>{6A6374B2-06B2-4D52-AB24-B8F0D9814712}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bev.IO.PerkinElmerAsciiReader</RootNamespace>
-    <AssemblyName>Bev.IO.PerkinElmerAsciiReader</AssemblyName>
+    <RootNamespace>Bev.IO.MmSpcWriter</RootNamespace>
+    <AssemblyName>Bev.IO.MmSpcWriter</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Bev.IO.SpectrumPod">
+      <HintPath>..\Bev.IO.SpectrumPod\bin\Release\Bev.IO.SpectrumPod.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,18 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsciiReader.cs" />
+    <Compile Include="MmSpcWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Bev.IO.FileLoder\Bev.IO.FileLoader.csproj">
-      <Project>{22B62F4A-5ACC-4A75-B332-3CB578F480AC}</Project>
-      <Name>Bev.IO.FileLoader</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Bev.IO.SpectrumPod\Bev.IO.SpectrumPod.csproj">
-      <Project>{4B607A1A-8D7B-44D8-AC37-B064869C3380}</Project>
-      <Name>Bev.IO.SpectrumPod</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

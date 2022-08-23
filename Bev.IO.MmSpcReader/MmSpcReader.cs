@@ -21,10 +21,10 @@ namespace Bev.IO.MmSpcReader
 
         private void ParseSpectralHeader()
         {
-            Spectrum.Header.Type = EstimateTypeOfSpectrum();
-            Spectrum.Header.Origin = $"Data parsed by {Assembly.GetExecutingAssembly().GetName().Name} {Assembly.GetExecutingAssembly().GetName().Version}";
-            Spectrum.Header.SampleDescription = ExtractLine(1);
-            Spectrum.Header.FreeComments = GetFreeComments(2, GetIndexOfData());
+            Spectrum.Type = EstimateTypeOfSpectrum();
+            Spectrum.AddMetaData("Origin", $"Data parsed by {Assembly.GetExecutingAssembly().GetName().Name} {Assembly.GetExecutingAssembly().GetName().Version}");
+            Spectrum.AddMetaData("SampleDescription", ExtractLine(1));
+            //Spectrum.Header.FreeComments = GetFreeComments(2, GetIndexOfData());
         }
 
         private void ParseSpectralData()

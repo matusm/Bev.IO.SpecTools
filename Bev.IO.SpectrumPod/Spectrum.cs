@@ -10,14 +10,14 @@ namespace Bev.IO.SpectrumPod
         // Actual spectrum 
         public SpectralPoint[] Data => spectralData.ToArray();
         // Meta data as string in two flavours
-        public string MetaDataKV => GetMetaDataAsKV();
-        public string MetaDataJcamp => GetMetaDataAsJcamp();
+        public string MetaDataKV => GetMetaDataAsKV(true);
+        public string MetaDataJcamp => GetMetaDataAsJcamp(true);
         // User supplied meta data
         public SpectralType Type = SpectralType.Unknown;
         public DateTime? MeasurementDate;
         public DateTime? ModificationDate;
-        public DateTime? OriginalFileCreationDate;
-        public string OriginalFileName = string.Empty;
+        public DateTime? SourceFileCreationDate;
+        public string SourceFileName = string.Empty;
         public string XUnitName { get; private set; } = string.Empty;
         public string YUnitName { get; private set; } = string.Empty;
         // Computed meta data properties 
@@ -65,18 +65,16 @@ namespace Bev.IO.SpectrumPod
 
         public void AddMetaData(string key, string value) => header.SetMetaData(key, value);
 
-        private string GetMetaDataAsJcamp()
+        private string GetMetaDataAsJcamp(bool justify)
         {
             PopulateJcampComputedMetaData();
-            header.BeautifyLabels(false);
-            return header.ToJcampString();
+            return header.ToJcampString(justify);
         }
 
-        private string GetMetaDataAsKV()
+        private string GetMetaDataAsKV(bool justify)
         {
             PopulateJcampComputedMetaData();
-            header.BeautifyLabels(false);
-            return header.ToKVString();
+            return header.ToKVString(justify);
         }
 
         private SpectralSpacing EstimateSpacingType()
@@ -114,7 +112,7 @@ namespace Bev.IO.SpectrumPod
 
         private void PopulateJcampComputedMetaData()
         {
-            header.SetMetaData("OriginalFileName", OriginalFileName);
+            header.SetMetaData("SourceFileName", SourceFileName);
             if (MeasurementDate.HasValue)
             {
                 header.SetJcampRequiredMetaData("Date", MeasurementDate.Value.ToString("yy/MM/dd"));
@@ -124,8 +122,8 @@ namespace Bev.IO.SpectrumPod
             }
             if(ModificationDate.HasValue)
                 header.SetMetaData("ModificationDate", ModificationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
-            if (OriginalFileCreationDate.HasValue)
-                header.SetMetaData("OriginalFileCreationDate", OriginalFileCreationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
+            if (SourceFileCreationDate.HasValue)
+                header.SetMetaData("SourceFileCreationDate", SourceFileCreationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
             header.SetJcampRequiredMetaData("DataType", ToJcampDataType(Type));
             header.SetJcampRequiredMetaData("Length", Length.ToString());
             header.SetJcampRequiredMetaData("FirstX", FirstX.ToString());

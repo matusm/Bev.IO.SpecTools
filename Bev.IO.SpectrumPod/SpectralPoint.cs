@@ -25,6 +25,11 @@ namespace Bev.IO.SpectrumPod
 
         public int CompareTo(SpectralPoint other) => X.CompareTo(other.X);
 
+        public string ToCsvString(string separator)
+        {
+            return $"{X,11:F6}{separator}{Y,11:F6}";
+        }
+
         public override string ToString() => $"[SpectralPoint: X={X}, Y={Y}]";
     }
 }

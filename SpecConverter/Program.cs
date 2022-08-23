@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Bev.IO.MmSpcWriter;
 
 namespace SpecConverter
 {
@@ -18,15 +19,16 @@ namespace SpecConverter
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             string workingDirectory = Directory.GetCurrentDirectory();
-            string[] filenames = Directory.GetFiles(workingDirectory, @"*.spc");
+            string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
             {
-                Spectrum spectrum = ProcessMmSpcFile(fn);
-                //Spectrum spectrum = ProcessAsciiFile(fn);
-                JcampWriter jw = new JcampWriter(spectrum);
-                Console.WriteLine(jw.GetRecord());
+                //Spectrum spectrum = ProcessMmSpcFile(fn);
+                Spectrum spectrum = ProcessAsciiFile(fn);
+                //JcampWriter jw = new JcampWriter(spectrum);
+                MmSpcWriter sw = new MmSpcWriter(spectrum);
+                Console.WriteLine(sw.GetRecord());
             }
 
         }
@@ -36,53 +38,16 @@ namespace SpecConverter
             LoadSpecFile sFile = new LoadSpecFile(filename, Encoding.GetEncoding(437));
             MmSpcReader sReader = new MmSpcReader(sFile.LinesInFile);
             Spectrum spectrum = sReader.Spectrum;
-            spectrum.Header.OriginalFileName = sFile.FileName;
-            spectrum.Header.OriginalFileCreationDate = sFile.FileCreationTime;
+            spectrum.SourceFileName = sFile.FileName;
+            spectrum.SourceFileCreationDate = sFile.FileCreationTime;
             return spectrum;
         }
 
         private static Spectrum ProcessAsciiFile(string filename)
         {
             LoadSpecFile sFile = new LoadSpecFile(filename);
-            AsciiReader aReader = new AsciiReader(sFile.LinesInFile);
+            AsciiReader aReader = new AsciiReader(sFile);
             Spectrum spectrum = aReader.Spectrum;
-            spectrum.Header.OriginalFileName = sFile.FileName;
-            spectrum.Header.OriginalFileCreationDate = sFile.FileCreationTime;
-            //Console.WriteLine($"PE version {aReader.PeFileVersion:F2}");
-            //Console.WriteLine($"Filename:              {filename}");
-            //Console.WriteLine($"File signature:        {aReader.FileSignature}");
-            //Console.WriteLine($"SpectrumDataType:      {spectrum.Header.DataType}");
-            //Console.WriteLine($"spectrum.AbscissaType: {spectrum.AbscissaType}");
-            //Console.WriteLine($"Spectrum.FirstX:       {spectrum.FirstX}");
-            //Console.WriteLine($"Spectrum.LastX:        {spectrum.LastX}");
-            //Console.WriteLine($"Spectrum.DeltaX:       {spectrum.DeltaX}");
-            //Console.WriteLine($"Spectrum.Length:       {spectrum.Length}");
-            //Console.WriteLine($"Spectrum.MaxY:         {spectrum.MaxY}");
-            //Console.WriteLine($"Spectrum.MinY:         {spectrum.MinY}");
-            //Console.WriteLine($"Spectrum.FirstY:       {spectrum.FirstY}");
-            //Console.WriteLine($"Spectrum.LastY:        {spectrum.LastY}");
-            //Console.WriteLine($"Spectrum.XUnitName:    {spectrum.XUnitName}");
-            //Console.WriteLine($"Spectrum.YUnitName:    {spectrum.YUnitName}");
-            //Console.WriteLine($"MeasurementDate:       {spectrum.Header.MeasurementDate}");
-            //Console.WriteLine($"ModificationDate:      {spectrum.Header.ModificationDate}");
-            //Console.WriteLine($"Origin:                {spectrum.Header.Origin}");
-            //Console.WriteLine($"Owner:                 {spectrum.Header.Owner}");
-            //Console.WriteLine($"SourceReference:       {spectrum.Header.SourceReference}");
-            //Console.WriteLine($"CrossReference:        {spectrum.Header.CrossReference}");
-            //Console.WriteLine($"SampleDescription:     {spectrum.Header.SampleDescription}");
-            //Console.WriteLine($"SpectrometerModel:     {spectrum.Header.SpectrometerModel}");
-            //Console.WriteLine($"SpectrometerSN:        {spectrum.Header.SpectrometerSerialNumber}");
-            //Console.WriteLine($"SpectrometerSystem:    {spectrum.Header.SpectrometerSystem}");
-            //Console.WriteLine($"Title:                 {spectrum.Header.Title}");
-            //Console.WriteLine($"SoftwareID:            {spectrum.Header.SoftwareID}");
-            //Console.WriteLine($"Resolution:            {spectrum.Header.Resolution}");
-            //Console.WriteLine($"InstrumentParameters:  {spectrum.Header.InstrumentParameters}");
-            //Console.WriteLine($"DetectorChange:        {spectrum.Header.DetectorChange}");
-            //Console.WriteLine($"LampChange:            {spectrum.Header.LampChange}");
-            //if(spectrum.Header.FreeComments.Length>0)
-            //    for (int i = 0; i < spectrum.Header.FreeComments.Length; i++)
-            //        Console.WriteLine($"Comment#{i}:             {spectrum.Header.FreeComments[i]}");
-            //Console.WriteLine("=========================================================");
             return spectrum;
         }
     }

@@ -1,5 +1,4 @@
 ﻿using Bev.IO.SpectrumPod;
-using System;
 using System.Globalization;
 using System.Text;
 
@@ -7,14 +6,11 @@ namespace Bev.IO.JcampDxWriter
 {
     public class JcampWriter
     {
-        private const string tabularIndend = "";
-        private const int maxColumns = 80;
         private readonly Spectrum spectrum;
         private StringBuilder stringBuilder = new StringBuilder();
 
         public double Xfactor = 1;
         public double Yfactor = 1;
-        public bool TruncateLines = false;
 
         public JcampWriter(Spectrum spectrum)
         {
@@ -31,13 +27,7 @@ namespace Bev.IO.JcampDxWriter
             return stringBuilder.ToString();
         }
 
-        private void ConsolidateRecords()
-        {
-            spectrum.AddMetaData("XUnits", TranslateUnit(spectrum.XUnitName));
-            spectrum.AddMetaData("YUnits", TranslateUnit(spectrum.YUnitName));
-            spectrum.AddMetaData("XFactor", Xfactor.ToString());
-            spectrum.AddMetaData("YFactor", Yfactor.ToString());
-        }
+        private void CreateJcampHeader() => stringBuilder.Append(spectrum.MetaDataJcamp);
 
         private void CreateJcampData()
         {
@@ -46,7 +36,8 @@ namespace Bev.IO.JcampDxWriter
                 CoreRecord("XYDATA", "(X++(Y..Y))");
                 foreach (var point in spectrum.Data)
                 {
-                    stringBuilder.AppendLine($"{tabularIndend}{point.X / Xfactor} {point.Y / Yfactor}");
+                    stringBuilder.AppendLine(point.ToCsvString(" "));
+                    //stringBuilder.AppendLine($"{point.X / Xfactor:F6} {point.Y / Yfactor:F6}");
                 }
             }
             if (spectrum.AbscissaType == SpectralSpacing.VariableSpacing)
@@ -54,57 +45,26 @@ namespace Bev.IO.JcampDxWriter
                 CoreRecord("XYPOINTS", "(XY..XY)");
                 foreach (var point in spectrum.Data)
                 {
-                    stringBuilder.AppendLine($"{tabularIndend}{point.X / Xfactor}, {point.Y / Yfactor}");
+                    stringBuilder.AppendLine(point.ToCsvString(", "));
+                    //stringBuilder.AppendLine($"{point.X / Xfactor:F6}, {point.Y / Yfactor:F6}");
                 }
             }
             CoreRecord("END", string.Empty);
         }
 
-        private void CreateJcampHeader()
+        private void ConsolidateRecords()
         {
-            stringBuilder.AppendLine(spectrum.MetaDataJcamp);
-
-            //// file properties
-            //OptionalRecord("$FILENAME", spectrum.Header.OriginalFileName);
-            //OptionalRecord("$FILECREATIONDATE", spectrum.Header.OriginalFileCreationDate.ToString("yyyy/MM/dd HH:mm:ssK"));
-            //// Hitachi U3410 specific properties, as used in MM SPC files
-            //OptionalRecord("$SCANMODE", spectrum.Header.ScanMode);
-            //OptionalRecord("$DATAMODE", spectrum.Header.DataMode);
-            //OptionalRecord("$SCANSPEED", spectrum.Header.ScanSpeed);
-            //OptionalRecord("$BASELINEMODE", spectrum.Header.BaselineMode);
-            //OptionalRecord("$BANDPASS_UV_VIS", spectrum.Header.BandpassUvVis);
-            //OptionalRecord("$BANDPASS_NIR", spectrum.Header.BandpassNir);
-            //OptionalRecord("$NIR_BANDPASSMODE", spectrum.Header.NirBandpassMode);
-            //OptionalRecord("$NIR_PBSGAIN", spectrum.Header.NirPbSGain);
-            //OptionalRecord("$LIGHTSOURCE", spectrum.Header.LightSource);
-            //OptionalRecord("$DETECTORCHANGE", spectrum.Header.DetectorChange);
-            //OptionalRecord("$LAMPCHANGE", spectrum.Header.LampChange);
-            //OptionalRecord("$RESPONSE", spectrum.Header.Response);
-            //OptionalRecord("$HVGAIN", spectrum.Header.HvGain);
-            //// SPEC Raman
-            //OptionalRecord("$LASERPOWER", spectrum.Header.LaserPower);
-            //OptionalRecord("$LASERWAVELENGTH", spectrum.Header.LaserWavelength);
-            //OptionalRecord("$SAMPLETIME", spectrum.Header.SampleTime);
-            //OptionalRecord("$SLIT1", spectrum.Header.Slit1);
-            //OptionalRecord("$SLIT2", spectrum.Header.Slit2);
+            spectrum.AddMetaData("XUnits", TranslateUnit(spectrum.XUnitName));
+            spectrum.AddMetaData("YUnits", TranslateUnit(spectrum.YUnitName));
+            spectrum.AddMetaData("XFactor", Xfactor.ToString());
+            spectrum.AddMetaData("YFactor", Yfactor.ToString());
         }
 
         private void CoreRecord(string dataLabelName, string dataSet)
         {
-            HeaderEntry he = new HeaderEntry(dataSet, true, true);
-            he.PrettyLabel = dataLabelName;
-            stringBuilder.AppendLine(he.ToJcampString());
-        }
-
-        private string TruncateString(string longString)
-        {
-            if (TruncateLines == false)
-                return longString;
-            if (string.IsNullOrEmpty(longString))
-                return longString;
-            if (longString.Length <= maxColumns)
-                return longString;
-            return $"{longString.Substring(0, maxColumns - 3)}...";
+            HeaderRecord hr = new HeaderRecord(dataSet, true, true);
+            hr.PlainLabel = dataLabelName;
+            stringBuilder.AppendLine(hr.ToJcampString(-1));
         }
 
         private string TranslateUnit(string unitSymbol)
