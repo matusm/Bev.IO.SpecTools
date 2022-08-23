@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace Bev.IO.SpectrumPod
 {
@@ -45,8 +46,27 @@ namespace Bev.IO.SpectrumPod
             }
         }
 
-        
+        public string ToKVString()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var entry in metaDataDictonary)
+            {
+                if(entry.Value.IsFull)
+                    sb.AppendLine(entry.Value.ToKVString());
+            }
+            return sb.ToString();
+        }
 
+        public string ToJcampString()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var entry in metaDataDictonary)
+            {
+                if (entry.Value.IsFull || entry.Value.IsRequired)
+                    sb.AppendLine(entry.Value.ToJcampString());
+            }
+            return sb.ToString();
+        }
 
         private void PopulateJcampMetaData()
         {

@@ -9,8 +9,9 @@ namespace Bev.IO.SpectrumPod
     {
         // Actual spectrum 
         public SpectralPoint[] Data => spectralData.ToArray();
-        // Meta data for spectrum
-        private MetaData Header = new MetaData();
+        // Meta data as string in two flavours
+        public string MetaDataKV => GetMetaDataAsKV();
+        public string MetaDataJcamp => GetMetaDataAsJcamp();
         // User supplied meta data
         public SpectralType Type = SpectralType.Unknown;
         public DateTime? MeasurementDate;
@@ -62,6 +63,21 @@ namespace Bev.IO.SpectrumPod
             yStat.Restart();
         }
 
+
+        private string GetMetaDataAsJcamp()
+        {
+            PopulateJcampComputedMetaData();
+            header.BeautifyLabels(false);
+            return header.ToJcampString();
+        }
+
+        private string GetMetaDataAsKV()
+        {
+            PopulateJcampComputedMetaData();
+            header.BeautifyLabels(false);
+            return header.ToKVString();
+        }
+
         private SpectralSpacing EstimateSpacingType()
         {
             SpectralPoint[] spec = Data;
@@ -97,32 +113,32 @@ namespace Bev.IO.SpectrumPod
 
         private void PopulateJcampComputedMetaData()
         {
-            Header.SetMetaData("OriginalFileName", OriginalFileName);
+            header.SetMetaData("OriginalFileName", OriginalFileName);
             if (MeasurementDate.HasValue)
             {
-                Header.SetJcampRequiredMetaData("Date", MeasurementDate.Value.ToString("yy/MM/dd"));
-                Header.SetJcampRequiredMetaData("Time", MeasurementDate.Value.ToString("HH:mm:ss"));
-                Header.SetMetaData("Long Date", MeasurementDate.Value.ToString("yyyy/MM/dd HH:mm:ssK"));
-                Header.SetMetaData("MeasurementDate", MeasurementDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
+                header.SetJcampRequiredMetaData("Date", MeasurementDate.Value.ToString("yy/MM/dd"));
+                header.SetJcampRequiredMetaData("Time", MeasurementDate.Value.ToString("HH:mm:ss"));
+                header.SetMetaData("Long Date", MeasurementDate.Value.ToString("yyyy/MM/dd HH:mm:ssK"));
+                header.SetMetaData("MeasurementDate", MeasurementDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
             }
             if(ModificationDate.HasValue)
-                Header.SetMetaData("ModificationDate", ModificationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
+                header.SetMetaData("ModificationDate", ModificationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
             if (OriginalFileCreationDate.HasValue)
-                Header.SetMetaData("OriginalFileCreationDate", OriginalFileCreationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
-            Header.SetJcampRequiredMetaData("DataType", ToJcampDataType(Type));
-            Header.SetJcampRequiredMetaData("Length", Length.ToString());
-            Header.SetJcampRequiredMetaData("FirstX", FirstX.ToString());
-            Header.SetJcampRequiredMetaData("LastX", LastX.ToString());
-            Header.SetJcampRequiredMetaData("FirstY", FirstY.ToString());
-            Header.SetJcampMetaData("LastY", LastY.ToString());
-            Header.SetJcampMetaData("MaxX", MaxX.ToString());
-            Header.SetJcampMetaData("MinX", MinX.ToString());
-            Header.SetJcampMetaData("MaxY", MaxY.ToString());
-            Header.SetJcampMetaData("MinY", MinY.ToString());
+                header.SetMetaData("OriginalFileCreationDate", OriginalFileCreationDate.Value.ToString("yyyy-MM-ddTHH:mm:ssK"));
+            header.SetJcampRequiredMetaData("DataType", ToJcampDataType(Type));
+            header.SetJcampRequiredMetaData("Length", Length.ToString());
+            header.SetJcampRequiredMetaData("FirstX", FirstX.ToString());
+            header.SetJcampRequiredMetaData("LastX", LastX.ToString());
+            header.SetJcampRequiredMetaData("FirstY", FirstY.ToString());
+            header.SetJcampMetaData("LastY", LastY.ToString());
+            header.SetJcampMetaData("MaxX", MaxX.ToString());
+            header.SetJcampMetaData("MinX", MinX.ToString());
+            header.SetJcampMetaData("MaxY", MaxY.ToString());
+            header.SetJcampMetaData("MinY", MinY.ToString());
             if(!double.IsNaN(DeltaX))
-                Header.SetJcampMetaData("DeltaX", DeltaX.ToString());
-            Header.SetJcampRequiredMetaData("XUnits", XUnitName);
-            Header.SetJcampRequiredMetaData("YUnits", YUnitName);
+                header.SetJcampMetaData("DeltaX", DeltaX.ToString());
+            header.SetJcampRequiredMetaData("XUnits", XUnitName);
+            header.SetJcampRequiredMetaData("YUnits", YUnitName);
         }
 
         private string ToJcampDataType(SpectralType type)
@@ -146,7 +162,9 @@ namespace Bev.IO.SpectrumPod
             }
         }
 
-        private const double epsilon = 0.000001; // TODO works for Perkin Elmer spectrophotometer ascii files
+
+        private const double epsilon = 0.000001; // TODO: works for Perkin Elmer spectrophotometer ascii files
+        private readonly MetaData header = new MetaData();
         private readonly List<SpectralPoint> spectralData = new List<SpectralPoint>();
         private readonly SortOrder sortOrder;
         private readonly StatisticPod xStat = new StatisticPod();

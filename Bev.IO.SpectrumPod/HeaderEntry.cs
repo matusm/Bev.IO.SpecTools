@@ -19,6 +19,6 @@
 
         public string ToKVString() => $"{PrettyLabel} = {Value}";
 
-        public string ToJcampString() => IsJcampReserved ? $"##{PrettyLabel}= {Value}" : $"##${PrettyLabel}= {Value}";
+        public string ToJcampString() => IsJcampReserved ? $"##{PrettyLabel} = {Value}" : $"##${PrettyLabel}= {Value}";
     }
 }
