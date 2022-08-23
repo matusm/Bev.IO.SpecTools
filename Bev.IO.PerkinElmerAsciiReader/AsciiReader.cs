@@ -70,46 +70,57 @@ namespace Bev.IO.PerkinElmerAsciiReader
         {
             if (FileIsInvalid())
                 return;
-            Spectrum.Header.Type = EstimateTypeOfSpectrum();
-            Spectrum.Header.SourceReference = ExtractLine(2); // original filename
-            Spectrum.Header.MeasurementDate = CreationDate();
-            Spectrum.Header.ModificationDate = ModificationDate();
-            Spectrum.Header.Origin = $"Data parsed by {Assembly.GetExecutingAssembly().GetName().Name} {Assembly.GetExecutingAssembly().GetName().Version}";
-            Spectrum.Header.Owner = ExtractLine(7);
-            Spectrum.Header.SampleDescription = ExtractLine(8);
-            Spectrum.Header.Title = ExtractLine(8);
+            Spectrum.Type = EstimateTypeOfSpectrum();
+            Spectrum.AddMetaData("SourceReference", ExtractLine(2)); // original filename
+            Spectrum.MeasurementDate = CreationDate();
+            Spectrum.ModificationDate = ModificationDate();
+            Spectrum.AddMetaData("Origin", $"Data parsed by {Assembly.GetExecutingAssembly().GetName().Name} {Assembly.GetExecutingAssembly().GetName().Version}");
+            Spectrum.AddMetaData("Owner", ExtractLine(7));
+            Spectrum.AddMetaData("SampleDescription", ExtractLine(8));
+            Spectrum.AddMetaData("Title", ExtractLine(8));
             if (FileSignature == PeFileSignature.ValidVer400)
             {
                 int offset = GetIndexOfHdr() - 75; // all lines below #15 are shifted by this amount if multiple comments are added
-                Spectrum.Header.FreeComments = ParseFreeComments(offset).ToArray();
-                Spectrum.Header.SpectrometerModel = ExtractLine(11);
-                Spectrum.Header.SpectrometerSerialNumber = ExtractLine(12);
-                Spectrum.Header.SpectrometerSystem = EstimateSpectrometerSystem();
-                Spectrum.Header.SoftwareID = ExtractLine(13);
-                Spectrum.Header.Resolution = ExtractLine(17+offset);
-                Spectrum.Header.InstrumentParameters = ExtractLine(24+offset);
-                Spectrum.Header.MonochromatorChange = ExtractLine(41+offset);
-                Spectrum.Header.LampChange = ParseToDouble(ExtractLine(42+offset));
-                Spectrum.Header.DetectorChange = ExtractLine(43 + offset);
-                Spectrum.Header.SampleBeamPosition = ExtractLine(44 + offset);
-                Spectrum.Header.CommonBeamMask = ExtractLine(45 + offset);
-                Spectrum.Header.CommonBeamDepolarizer = ExtractLine(46 + offset);
-                Spectrum.Header.Attenuators = ExtractLine(47 + offset);
+                AddFreeComments(offset);
+                Spectrum.AddMetaData("SpectrometerModel", ExtractLine(11));
+                Spectrum.AddMetaData("SpectrometerSerialNumber", ExtractLine(12));
+                Spectrum.AddMetaData("SpectrometerSystem", EstimateSpectrometerSystem());
+                Spectrum.AddMetaData("SoftwareID", ExtractLine(13));
+                Spectrum.AddMetaData("Resolution", ExtractLine(17+offset));
+                Spectrum.AddMetaData("InstrumentParameters", ExtractLine(24+offset));
+                Spectrum.AddMetaData("MonochromatorChange",  ExtractLine(41+offset));
+                Spectrum.AddMetaData("LampChange", ParseToDouble(ExtractLine(42+offset)).ToString());
+                Spectrum.AddMetaData("DetectorChange", ExtractLine(43 + offset));
+                Spectrum.AddMetaData("SampleBeamPosition", ExtractLine(44 + offset));
+                Spectrum.AddMetaData("CommonBeamMask", ExtractLine(45 + offset));
+                Spectrum.AddMetaData("CommonBeamDepolarizer", ExtractLine(46 + offset));
+                Spectrum.AddMetaData("Attenuators", ExtractLine(47 + offset));
             }
             if (FileSignature == PeFileSignature.ValidVer160)
             {
-                Spectrum.Header.SpectrometerSystem = ExtractLine(20); // really?
+                Spectrum.AddMetaData("SpectrometerSystem", ExtractLine(20)); // really?
             }
         }
 
-        private List<string> ParseFreeComments(int offset)
+        private void AddFreeComments(int offset)
+        {
+            var comments = ParseFreeComments(offset);
+            if (comments.Length == 0)
+                return;
+            for (int i = 0; i < comments.Length; i++)
+            {
+                Spectrum.AddMetaData($"Comment{i + 1}", comments[i]);
+            }
+        }
+
+        private string[] ParseFreeComments(int offset)
         {
             List<string> comments = new List<string>();
             for (int i = 0; i < offset; i++)
             {
                 comments.Add(ExtractLine(i + 14));
             }
-            return comments;
+            return comments.ToArray();
         }
 
         private SpectralType EstimateTypeOfSpectrum()
@@ -126,9 +137,9 @@ namespace Bev.IO.PerkinElmerAsciiReader
         private string EstimateSpectrometerSystem()
         {
             string snPrefix = " SN:";
-            if (string.IsNullOrWhiteSpace(Spectrum.Header.SpectrometerSerialNumber))
+            if (string.IsNullOrWhiteSpace(ExtractLine(12)))
                 snPrefix = string.Empty;
-            return $"{Spectrum.Header.SpectrometerModel}{snPrefix}{Spectrum.Header.SpectrometerSerialNumber}".Trim();
+            return $"{ExtractLine(11)}{snPrefix}{ExtractLine(12)}".Trim();
         }
 
         private void ParseUnitNames()

@@ -63,6 +63,7 @@ namespace Bev.IO.SpectrumPod
             yStat.Restart();
         }
 
+        public void AddMetaData(string key, string value) => header.SetMetaData(key, value);
 
         private string GetMetaDataAsJcamp()
         {
