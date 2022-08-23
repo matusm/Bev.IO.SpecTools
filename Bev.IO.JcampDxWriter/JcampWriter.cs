@@ -7,13 +7,10 @@ namespace Bev.IO.JcampDxWriter
 {
     public class JcampWriter
     {
-        private const string dataLabelFlag = "##";
-        private const string dataLabelTerminator = "= ";    // trailing space included
         private const string tabularIndend = "";
         private const int maxColumns = 80;
         private readonly Spectrum spectrum;
-        private StringBuilder stringBuilder;
-
+        private StringBuilder stringBuilder = new StringBuilder();
 
         public double Xfactor = 1;
         public double Yfactor = 1;
@@ -23,23 +20,23 @@ namespace Bev.IO.JcampDxWriter
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             this.spectrum = spectrum;
-            stringBuilder = new StringBuilder();
         }
 
         public string GetRecord()
         {
+            ConsolidateRecords();
             stringBuilder.Clear();
             CreateJcampHeader();
             CreateJcampData();
             return stringBuilder.ToString();
         }
 
-        private void OptionalFreeCommentsRecord()
+        private void ConsolidateRecords()
         {
-            if (spectrum.Header.FreeComments.Length == 0)
-                return;
-            for (int i = 0; i < spectrum.Header.FreeComments.Length; i++)
-                OptionalRecord($"$COMMENT_{i}", spectrum.Header.FreeComments[i]);
+            spectrum.AddMetaData("XUnits", TranslateUnit(spectrum.XUnitName));
+            spectrum.AddMetaData("YUnits", TranslateUnit(spectrum.YUnitName));
+            spectrum.AddMetaData("XFactor", Xfactor.ToString());
+            spectrum.AddMetaData("YFactor", Yfactor.ToString());
         }
 
         private void CreateJcampData()
@@ -65,95 +62,39 @@ namespace Bev.IO.JcampDxWriter
 
         private void CreateJcampHeader()
         {
-            CoreRecord("TITLE", spectrum.Header.Title);
-            CoreRecord("JCAMP-DX", "4.24");
-            CoreRecord("DATA TYPE", spectrum.Header.DataType);
-            CoreRecord("ORIGIN", spectrum.Header.Origin);
-            CoreRecord("OWNER", spectrum.Header.Owner);
-            OptionalRecord("SAMPLE DESCRIPTION", spectrum.Header.SampleDescription);
-            OptionalRecord("DATE", spectrum.Header.MeasurementDate.ToString("yy/MM/dd"));
-            OptionalRecord("TIME", spectrum.Header.MeasurementDate.ToString("HH:mm:ss"));
-            OptionalRecord("$LONG DATE", spectrum.Header.MeasurementDate.ToString("yyyy/MM/dd HH:mm:ssK")); // this is not 4.24 compliant!
-            OptionalRecord("SOURCE REFERENCE", spectrum.Header.SourceReference);
-            OptionalRecord("CROSS REFERENCE", spectrum.Header.CrossReference);
-            OptionalRecord("SPECTROMETER/DATA SYSTEM", spectrum.Header.SpectrometerSystem);
-            OptionalRecord("INSTRUMENT PARAMETERS", spectrum.Header.InstrumentParameters);
-            OptionalRecord("SAMPLING PROCEDURE", spectrum.Header.SamplingProcedure);
-            OptionalRecord("DATA PROCESSING", spectrum.Header.DataProcessing);
-            OptionalRecord("RESOLUTION", spectrum.Header.Resolution);
-            CoreRecord("XUNITS", TranslateUnit(spectrum.XUnitName));
-            CoreRecord("YUNITS", TranslateUnit(spectrum.YUnitName));
-            CoreRecord("XFACTOR", Xfactor);
-            CoreRecord("YFACTOR", Yfactor);
-            CoreRecord("FIRSTX", spectrum.FirstX);
-            CoreRecord("LASTX", spectrum.LastX);
-            CoreRecord("NPOINTS", spectrum.Length);
-            CoreRecord("FIRSTY", spectrum.FirstY);
-            OptionalRecord("DELTAX", spectrum.DeltaX);
-            OptionalRecord("MINX", spectrum.MinX);
-            OptionalRecord("MAXX", spectrum.MaxX);
-            OptionalRecord("MINY", spectrum.MinY);
-            OptionalRecord("MAXY", spectrum.MaxY);
-            OptionalRecord("XLABEL", spectrum.Header.XLabel);
-            OptionalRecord("YLABEL", spectrum.Header.YLabel);
-            OptionalRecord("CONCENTRATIONS", spectrum.Header.Concentrations);
-            OptionalRecord("SAMPLINGPROCEDURE", spectrum.Header.SamplingProcedure);
-            OptionalRecord("STATE", spectrum.Header.State);
-            OptionalRecord("PATHLENGTH", spectrum.Header.PathLength);
-            OptionalRecord("PRESSURE", spectrum.Header.Pressure);
-            OptionalRecord("TEMPERATURE", spectrum.Header.Temperature);
-            OptionalRecord("DATAPROCESSING", spectrum.Header.DataProcessing);
-            // file properties
-            OptionalRecord("$FILENAME", spectrum.Header.OriginalFileName);
-            OptionalRecord("$FILECREATIONDATE", spectrum.Header.OriginalFileCreationDate.ToString("yyyy/MM/dd HH:mm:ssK"));
-            // Hitachi U3410 specific properties, as used in MM SPC files
-            OptionalRecord("$SCANMODE", spectrum.Header.ScanMode);
-            OptionalRecord("$DATAMODE", spectrum.Header.DataMode);
-            OptionalRecord("$SCANSPEED", spectrum.Header.ScanSpeed);
-            OptionalRecord("$BASELINEMODE", spectrum.Header.BaselineMode);
-            OptionalRecord("$BANDPASS_UV_VIS", spectrum.Header.BandpassUvVis);
-            OptionalRecord("$BANDPASS_NIR", spectrum.Header.BandpassNir);
-            OptionalRecord("$NIR_BANDPASSMODE", spectrum.Header.NirBandpassMode);
-            OptionalRecord("$NIR_PBSGAIN", spectrum.Header.NirPbSGain);
-            OptionalRecord("$LIGHTSOURCE", spectrum.Header.LightSource);
-            OptionalRecord("$DETECTORCHANGE", spectrum.Header.DetectorChange);
-            OptionalRecord("$LAMPCHANGE", spectrum.Header.LampChange);
-            OptionalRecord("$RESPONSE", spectrum.Header.Response);
-            OptionalRecord("$HVGAIN", spectrum.Header.HvGain);
-            // SPEC Raman
-            OptionalRecord("$LASERPOWER", spectrum.Header.LaserPower);
-            OptionalRecord("$LASERWAVELENGTH", spectrum.Header.LaserWavelength);
-            OptionalRecord("$SAMPLETIME", spectrum.Header.SampleTime);
-            OptionalRecord("$SLIT1", spectrum.Header.Slit1);
-            OptionalRecord("$SLIT2", spectrum.Header.Slit2);
-            OptionalFreeCommentsRecord();
+            stringBuilder.AppendLine(spectrum.MetaDataJcamp);
+
+            //// file properties
+            //OptionalRecord("$FILENAME", spectrum.Header.OriginalFileName);
+            //OptionalRecord("$FILECREATIONDATE", spectrum.Header.OriginalFileCreationDate.ToString("yyyy/MM/dd HH:mm:ssK"));
+            //// Hitachi U3410 specific properties, as used in MM SPC files
+            //OptionalRecord("$SCANMODE", spectrum.Header.ScanMode);
+            //OptionalRecord("$DATAMODE", spectrum.Header.DataMode);
+            //OptionalRecord("$SCANSPEED", spectrum.Header.ScanSpeed);
+            //OptionalRecord("$BASELINEMODE", spectrum.Header.BaselineMode);
+            //OptionalRecord("$BANDPASS_UV_VIS", spectrum.Header.BandpassUvVis);
+            //OptionalRecord("$BANDPASS_NIR", spectrum.Header.BandpassNir);
+            //OptionalRecord("$NIR_BANDPASSMODE", spectrum.Header.NirBandpassMode);
+            //OptionalRecord("$NIR_PBSGAIN", spectrum.Header.NirPbSGain);
+            //OptionalRecord("$LIGHTSOURCE", spectrum.Header.LightSource);
+            //OptionalRecord("$DETECTORCHANGE", spectrum.Header.DetectorChange);
+            //OptionalRecord("$LAMPCHANGE", spectrum.Header.LampChange);
+            //OptionalRecord("$RESPONSE", spectrum.Header.Response);
+            //OptionalRecord("$HVGAIN", spectrum.Header.HvGain);
+            //// SPEC Raman
+            //OptionalRecord("$LASERPOWER", spectrum.Header.LaserPower);
+            //OptionalRecord("$LASERWAVELENGTH", spectrum.Header.LaserWavelength);
+            //OptionalRecord("$SAMPLETIME", spectrum.Header.SampleTime);
+            //OptionalRecord("$SLIT1", spectrum.Header.Slit1);
+            //OptionalRecord("$SLIT2", spectrum.Header.Slit2);
         }
 
-        private void OptionalRecord(string dataLabelName, double dataNum)
+        private void CoreRecord(string dataLabelName, string dataSet)
         {
-            if (double.IsNaN(dataNum))
-                return;
-            CoreRecord(dataLabelName, dataNum);
+            HeaderEntry he = new HeaderEntry(dataSet, true, true);
+            he.PrettyLabel = dataLabelName;
+            stringBuilder.AppendLine(he.ToJcampString());
         }
-
-        private void OptionalRecord(string dataLabelName, string dataSet)
-        {
-            if (string.IsNullOrEmpty(dataSet))
-                return;
-            CoreRecord(dataLabelName, dataSet);
-        }
-
-        private void CoreRecord(
-            string dataLabelName,
-            string dataSet) => stringBuilder.AppendLine(LabeledDataRecord(dataLabelName, dataSet));
-
-        private void CoreRecord(
-            string dataLabelName,
-            double dataNum) => CoreRecord(dataLabelName, dataNum.ToString());
-
-        private string LabeledDataRecord(
-            string dataLabelName,
-            string dataSet) => TruncateString($"{dataLabelFlag}{dataLabelName}{dataLabelTerminator}{dataSet}");
 
         private string TruncateString(string longString)
         {
