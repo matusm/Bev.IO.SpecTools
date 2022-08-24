@@ -7,7 +7,7 @@ namespace Bev.IO.JcampDxWriter
     public class JcampWriter
     {
         private readonly Spectrum spectrum;
-        private StringBuilder stringBuilder = new StringBuilder();
+        private readonly StringBuilder stringBuilder = new StringBuilder();
 
         public double Xfactor = 1;
         public double Yfactor = 1;
@@ -22,14 +22,14 @@ namespace Bev.IO.JcampDxWriter
         {
             ConsolidateRecords();
             stringBuilder.Clear();
-            CreateJcampHeader();
-            CreateJcampData();
+            CreateHeader();
+            CreateData();
             return stringBuilder.ToString();
         }
 
-        private void CreateJcampHeader() => stringBuilder.Append(spectrum.MetaDataJcamp);
+        private void CreateHeader() => stringBuilder.Append(spectrum.MetaDataJcamp);
 
-        private void CreateJcampData()
+        private void CreateData()
         {
             if (spectrum.AbscissaType == SpectralSpacing.FixedSpacing)
             {
@@ -54,8 +54,8 @@ namespace Bev.IO.JcampDxWriter
 
         private void ConsolidateRecords()
         {
-            spectrum.AddMetaData("XUnits", TranslateUnit(spectrum.XUnitName));
-            spectrum.AddMetaData("YUnits", TranslateUnit(spectrum.YUnitName));
+            spectrum.AddMetaData("XUnits", TranslateUnitForJcamp(spectrum.XUnitName));
+            spectrum.AddMetaData("YUnits", TranslateUnitForJcamp(spectrum.YUnitName));
             spectrum.AddMetaData("XFactor", Xfactor.ToString());
             spectrum.AddMetaData("YFactor", Yfactor.ToString());
         }
@@ -67,7 +67,7 @@ namespace Bev.IO.JcampDxWriter
             stringBuilder.AppendLine(hr.ToJcampString(-1));
         }
 
-        private string TranslateUnit(string unitSymbol)
+        private string TranslateUnitForJcamp(string unitSymbol)
         {
             string symbol = unitSymbol.ToUpper().Trim();
             if(string.IsNullOrWhiteSpace(symbol))

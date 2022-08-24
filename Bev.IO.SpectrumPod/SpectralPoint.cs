@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Bev.IO.SpectrumPod
 {
@@ -25,12 +26,15 @@ namespace Bev.IO.SpectrumPod
 
         public int CompareTo(SpectralPoint other) => X.CompareTo(other.X);
 
-        public string ToCsvString() => ToCsvString(",");
+        public string ToCsvString() => ToCsvString(",", "", "");
 
-        public string ToCsvString(string separator)
+        public string ToCsvString(string separator) => ToCsvString(separator, ",8:F3", ",10:F6");
+
+        public string ToCsvString(string separator, string xSpecifier, string ySpecifier)
         {
-            ///return $"{X,11:F6}{separator}{Y,11:F6}";
-            return $"{X.ToString("F6")}{separator}{Y.ToString("F6")}";
+            string xStr = string.Format(CultureInfo.InvariantCulture, string.Format("{{0{0}}}", xSpecifier), X);
+            string yStr = string.Format(CultureInfo.InvariantCulture, string.Format("{{0{0}}}", ySpecifier), Y);
+            return $"{xStr}{separator}{yStr}";
         }
 
         public override string ToString() => $"[SpectralPoint: X={X}, Y={Y}]";

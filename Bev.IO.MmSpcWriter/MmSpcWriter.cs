@@ -7,7 +7,7 @@ namespace Bev.IO.MmSpcWriter
     public class MmSpcWriter
     {
         private readonly Spectrum spectrum;
-        private StringBuilder stringBuilder = new StringBuilder();
+        private readonly StringBuilder stringBuilder = new StringBuilder();
 
         public MmSpcWriter(Spectrum spectrum)
         {
@@ -19,17 +19,17 @@ namespace Bev.IO.MmSpcWriter
         {
             ConsolidateRecords();
             stringBuilder.Clear();
-            CreateKVHeader();
-            CreateKVSeparator();
-            CreateKVData();
+            CreateHeader();
+            CreateSeparator();
+            CreateData();
             return stringBuilder.ToString();
         }
 
-        private void CreateKVHeader() => stringBuilder.Append(spectrum.MetaDataKV);
+        private void CreateHeader() => stringBuilder.Append(spectrum.MetaDataKV);
 
-        private void CreateKVSeparator() => stringBuilder.AppendLine("@@@@");
+        private void CreateSeparator() => stringBuilder.AppendLine("@@@@");
         
-        private void CreateKVData()
+        private void CreateData()
         {
             foreach (var point in spectrum.Data)
             {
