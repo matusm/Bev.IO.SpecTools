@@ -1,7 +1,5 @@
-﻿using Bev.IO.FileLoader;
-using Bev.IO.PerkinElmerAsciiReader;
-using Bev.IO.SpectrumPod;
-using Bev.IO.MmSpcReader;
+﻿using Bev.IO.SpectrumPod;
+using Bev.IO.SpectrumLoader;
 using System;
 using System.Globalization;
 using System.IO;

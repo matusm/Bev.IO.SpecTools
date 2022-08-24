@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7C52AFF0-F062-4E1F-A854-89E3EDD727B5}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>SpecConverter</RootNamespace>
-    <AssemblyName>SpecConverter</AssemblyName>
+    <ProjectGuid>{7FD08A02-BBB8-4C97-AB17-49779C2CA19E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Bev.IO.SpectrumLoader</RootNamespace>
+    <AssemblyName>Bev.IO.SpectrumLoader</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,12 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bev.IO.JcampDxWriter">
-      <HintPath>..\Bev.IO.JcampDxWriter\bin\Release\Bev.IO.JcampDxWriter.dll</HintPath>
-    </Reference>
-    <Reference Include="Bev.IO.SpectrumLoader">
-      <HintPath>..\Bev.IO.SpectrumLoader\bin\Release\Bev.IO.SpectrumLoader.dll</HintPath>
-    </Reference>
     <Reference Include="Bev.IO.SpectrumPod">
       <HintPath>..\Bev.IO.SpectrumPod\bin\Release\Bev.IO.SpectrumPod.dll</HintPath>
     </Reference>
@@ -52,11 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="AsciiReader.cs" />
+    <Compile Include="LoadSpecFile.cs" />
+    <Compile Include="MmSpcReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
