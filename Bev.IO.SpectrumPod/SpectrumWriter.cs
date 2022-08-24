@@ -2,14 +2,14 @@
 using System.Globalization;
 using System.Text;
 
-namespace Bev.IO.MmSpcWriter
+namespace Bev.IO.SpectrumPod
 {
-    public class MmSpcWriter
+    public abstract class SpectrumWriter
     {
         private readonly Spectrum spectrum;
         private readonly StringBuilder stringBuilder = new StringBuilder();
 
-        public MmSpcWriter(Spectrum spectrum)
+        public SpectrumWriter(Spectrum spectrum)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             this.spectrum = spectrum;
@@ -25,21 +25,14 @@ namespace Bev.IO.MmSpcWriter
             return stringBuilder.ToString();
         }
 
-        private void CreateHeader() => stringBuilder.Append(spectrum.MetaDataKV);
+        public abstract void CreateHeader();
 
-        private void CreateSeparator() => stringBuilder.AppendLine("@@@@");
-        
-        private void CreateData()
-        {
-            foreach (var point in spectrum.Data)
-            {
-                stringBuilder.AppendLine(point.ToLine(" "));
-            }
-        }
+        public abstract void CreateSeparator();
 
-        private void ConsolidateRecords()
-        {
-            // place for meta data cleanup
-        }
+        public abstract void CreateData();
+
+        public abstract void ConsolidateRecords();
+
+
     }
 }

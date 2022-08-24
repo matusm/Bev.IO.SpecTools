@@ -26,11 +26,11 @@ namespace Bev.IO.SpectrumPod
 
         public int CompareTo(SpectralPoint other) => X.CompareTo(other.X);
 
-        public string ToCsvString() => ToCsvString(",", "", "");
+        public string ToCsvLine() => ToLine(",", "", "");
 
-        public string ToCsvString(string separator) => ToCsvString(separator, ",8:F3", ",10:F6");
+        public string ToLine(string separator) => ToLine(separator, ",8:F3", ",10:F6"); // X in nm, Y in %T
 
-        public string ToCsvString(string separator, string xSpecifier, string ySpecifier)
+        public string ToLine(string separator, string xSpecifier, string ySpecifier)
         {
             string xStr = string.Format(CultureInfo.InvariantCulture, string.Format("{{0{0}}}", xSpecifier), X);
             string yStr = string.Format(CultureInfo.InvariantCulture, string.Format("{{0{0}}}", ySpecifier), Y);

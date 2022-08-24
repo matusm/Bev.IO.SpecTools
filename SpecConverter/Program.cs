@@ -3,6 +3,7 @@ using Bev.IO.PerkinElmerAsciiReader;
 using Bev.IO.SpectrumPod;
 using Bev.IO.JcampDxWriter;
 using Bev.IO.MmSpcReader;
+using Bev.IO.SpecCsvWriter;
 using System;
 using System.Globalization;
 using System.IO;
@@ -26,7 +27,8 @@ namespace SpecConverter
             {
                 //Spectrum spectrum = ProcessMmSpcFile(fn);
                 Spectrum spectrum = ProcessAsciiFile(fn);
-                JcampWriter writer = new JcampWriter(spectrum);
+                CsvWriter writer = new CsvWriter(spectrum);
+                //JcampWriter writer = new JcampWriter(spectrum);
                 //MmSpcWriter writer = new MmSpcWriter(spectrum);
                 Console.WriteLine(writer.GetRecord());
             }

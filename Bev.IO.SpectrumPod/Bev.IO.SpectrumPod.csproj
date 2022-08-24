@@ -44,11 +44,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CsvWriter.cs" />
     <Compile Include="HeaderRecord.cs" />
+    <Compile Include="JcampWriter.cs" />
     <Compile Include="MetaData.cs" />
+    <Compile Include="MmSpcWriter.cs" />
     <Compile Include="SpectralPoint.cs" />
     <Compile Include="Spectrum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpectrumWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
