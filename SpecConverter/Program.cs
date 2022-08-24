@@ -26,9 +26,9 @@ namespace SpecConverter
             {
                 //Spectrum spectrum = ProcessMmSpcFile(fn);
                 Spectrum spectrum = ProcessAsciiFile(fn);
-                //JcampWriter jw = new JcampWriter(spectrum);
-                MmSpcWriter sw = new MmSpcWriter(spectrum);
-                Console.WriteLine(sw.GetRecord());
+                JcampWriter writer = new JcampWriter(spectrum);
+                //MmSpcWriter writer = new MmSpcWriter(spectrum);
+                Console.WriteLine(writer.GetRecord());
             }
 
         }
