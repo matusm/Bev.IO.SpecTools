@@ -1,15 +1,11 @@
 ﻿using Bev.IO.FileLoader;
 using Bev.IO.PerkinElmerAsciiReader;
 using Bev.IO.SpectrumPod;
-using Bev.IO.JcampDxWriter;
 using Bev.IO.MmSpcReader;
-using Bev.IO.SpecCsvWriter;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Text;
-using Bev.IO.MmSpcWriter;
 
 namespace SpecConverter
 {
@@ -27,9 +23,9 @@ namespace SpecConverter
             {
                 //Spectrum spectrum = ProcessMmSpcFile(fn);
                 Spectrum spectrum = ProcessAsciiFile(fn);
-                CsvWriter writer = new CsvWriter(spectrum);
+                //CsvWriter writer = new CsvWriter(spectrum);
                 //JcampWriter writer = new JcampWriter(spectrum);
-                //MmSpcWriter writer = new MmSpcWriter(spectrum);
+                MmSpcWriter writer = new MmSpcWriter(spectrum);
                 Console.WriteLine(writer.GetRecord());
             }
 

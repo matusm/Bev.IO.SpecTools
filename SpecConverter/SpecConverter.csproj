@@ -42,14 +42,8 @@
     <Reference Include="Bev.IO.MmSpcReader">
       <HintPath>..\Bev.IO.MmSpcReader\bin\Release\Bev.IO.MmSpcReader.dll</HintPath>
     </Reference>
-    <Reference Include="Bev.IO.MmSpcWriter">
-      <HintPath>..\Bev.IO.MmSpcWriter\bin\Release\Bev.IO.MmSpcWriter.dll</HintPath>
-    </Reference>
     <Reference Include="Bev.IO.PerkinElmerAsciiReader">
       <HintPath>..\Bev.IO.PerkinElmerAsciiReader\bin\Release\Bev.IO.PerkinElmerAsciiReader.dll</HintPath>
-    </Reference>
-    <Reference Include="Bev.IO.SpecCsvWriter">
-      <HintPath>..\Bev.IO.SpecCsvWriter\bin\Release\Bev.IO.SpecCsvWriter.dll</HintPath>
     </Reference>
     <Reference Include="Bev.IO.SpectrumPod">
       <HintPath>..\Bev.IO.SpectrumPod\bin\Release\Bev.IO.SpectrumPod.dll</HintPath>

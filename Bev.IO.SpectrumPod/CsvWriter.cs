@@ -1,8 +1,7 @@
-﻿using Bev.IO.SpectrumPod;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
-namespace Bev.IO.SpecCsvWriter
+namespace Bev.IO.SpectrumPod
 {
     public class CsvWriter
     {

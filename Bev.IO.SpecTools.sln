@@ -11,13 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.PerkinElmerAsciiRead
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecConverter", "SpecConverter\SpecConverter.csproj", "{7C52AFF0-F062-4E1F-A854-89E3EDD727B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.JcampDxWriter", "Bev.IO.JcampDxWriter\Bev.IO.JcampDxWriter.csproj", "{5BA884D0-6EAE-4904-B078-33D2285956C5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.MmSpcReader", "Bev.IO.MmSpcReader\Bev.IO.MmSpcReader.csproj", "{31E6B202-AC34-4202-A362-0D6C213F706D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.MmSpcWriter", "Bev.IO.MmSpcWriter\Bev.IO.MmSpcWriter.csproj", "{6A6374B2-06B2-4D52-AB24-B8F0D9814712}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.SpecCsvWriter", "Bev.IO.SpecCsvWriter\Bev.IO.SpecCsvWriter.csproj", "{B679F90A-C883-4F53-837C-E2B861E16EE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,22 +35,10 @@ Global
 		{7C52AFF0-F062-4E1F-A854-89E3EDD727B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C52AFF0-F062-4E1F-A854-89E3EDD727B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C52AFF0-F062-4E1F-A854-89E3EDD727B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5BA884D0-6EAE-4904-B078-33D2285956C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BA884D0-6EAE-4904-B078-33D2285956C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BA884D0-6EAE-4904-B078-33D2285956C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BA884D0-6EAE-4904-B078-33D2285956C5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E6B202-AC34-4202-A362-0D6C213F706D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A6374B2-06B2-4D52-AB24-B8F0D9814712}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B679F90A-C883-4F53-837C-E2B861E16EE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B679F90A-C883-4F53-837C-E2B861E16EE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B679F90A-C883-4F53-837C-E2B861E16EE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B679F90A-C883-4F53-837C-E2B861E16EE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

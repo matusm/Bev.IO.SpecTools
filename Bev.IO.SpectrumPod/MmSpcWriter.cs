@@ -1,8 +1,7 @@
-﻿using Bev.IO.SpectrumPod;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
-namespace Bev.IO.MmSpcWriter
+namespace Bev.IO.SpectrumPod
 {
     public class MmSpcWriter
     {
