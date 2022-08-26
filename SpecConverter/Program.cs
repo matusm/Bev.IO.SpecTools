@@ -14,13 +14,14 @@ namespace SpecConverter
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             string workingDirectory = Directory.GetCurrentDirectory();
-            string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
+            //string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
+            string[] filenames = { "Sample44.Sample_05.asc", "IR.asc" };
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
             {
                 //Spectrum spectrum = ProcessMmSpcFile(fn);
-                Spectrum spectrum = ProcessAsciiFile(fn);
+                Spectrum spectrum = LoadAsciiFile(fn);
                 //CsvWriter writer = new CsvWriter(spectrum);
                 //JcampWriter writer = new JcampWriter(spectrum);
                 MmSpcWriter writer = new MmSpcWriter(spectrum);
@@ -29,7 +30,7 @@ namespace SpecConverter
 
         }
 
-        private static Spectrum ProcessMmSpcFile(string filename)
+        private static Spectrum LoadMmSpcFile(string filename)
         {
             LoadSpecFile sFile = new LoadSpecFile(filename, Encoding.GetEncoding(437));
             MmSpcReader sReader = new MmSpcReader(sFile.LinesInFile);
@@ -39,7 +40,7 @@ namespace SpecConverter
             return spectrum;
         }
 
-        private static Spectrum ProcessAsciiFile(string filename)
+        private static Spectrum LoadAsciiFile(string filename)
         {
             LoadSpecFile sFile = new LoadSpecFile(filename);
             AsciiReader aReader = new AsciiReader(sFile);
