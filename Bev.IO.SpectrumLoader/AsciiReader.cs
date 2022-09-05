@@ -9,7 +9,7 @@ namespace Bev.IO.SpectrumLoader
     public class AsciiReader
     {
         private readonly string[] lines; // the complete file as a text line array
-        private readonly string[] signatureTokens = new string[6];
+        private readonly string[] signatureTokens = new string[6]; // magic strings for Perkin Elemer ASC-files
 
         public Spectrum Spectrum { get; private set; }
         public PeFileSignature FileSignature { get; }
@@ -63,7 +63,7 @@ namespace Bev.IO.SpectrumLoader
                 return PeFileSignature.InValid;
             if (!signatureTokens[3].Contains("ASCII"))
                 return PeFileSignature.InValid;
-            if (!signatureTokens[4].Contains("PEDS"))
+            if (!signatureTokens[4].Contains("PEDS")) // no idea what this means
                 return PeFileSignature.InValid;
             if (signatureTokens[5].Contains("1.60"))
                 return PeFileSignature.ValidVer160;
@@ -104,7 +104,8 @@ namespace Bev.IO.SpectrumLoader
             }
             if (FileSignature == PeFileSignature.ValidVer160)
             {
-                Spectrum.AddMetaData("SpectrometerSystem", ExtractLine(20)); // really?
+                // this is just a guess
+                Spectrum.AddMetaData("SpectrometerSystem", ExtractLine(20));
             }
         }
 
