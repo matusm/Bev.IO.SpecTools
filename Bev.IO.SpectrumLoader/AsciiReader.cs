@@ -14,7 +14,7 @@ namespace Bev.IO.SpectrumLoader
         public Spectrum Spectrum { get; private set; }
         public PeFileSignature FileSignature { get; }
         public double PeFileVersion => ParseToDouble(signatureTokens[5]);
- 
+
         public AsciiReader(string[] textLines)
         {
             lines = textLines;
@@ -26,7 +26,7 @@ namespace Bev.IO.SpectrumLoader
             ParseUnitNames();
         }
 
-        public AsciiReader(LoadSpecFile file) : this (file.LinesInFile)
+        public AsciiReader(LoadSpecFile file) : this(file.LinesInFile)
         {
             Spectrum.SourceFileName = file.FileName;
             Spectrum.SourceFileCreationDate = file.FileCreationTime;
@@ -38,7 +38,7 @@ namespace Bev.IO.SpectrumLoader
             if (signature.Length < 72)
                 return sigTok;
             for (int i = 0; i < sigTok.Length; i++)
-                sigTok[i] = signature.Substring(i*12, 12);
+                sigTok[i] = signature.Substring(i * 12, 12);
             return sigTok;
         }
 
@@ -92,10 +92,10 @@ namespace Bev.IO.SpectrumLoader
                 Spectrum.AddMetaData("SpectrometerSerialNumber", ExtractLine(12));
                 Spectrum.AddMetaData("SpectrometerSystem", EstimateSpectrometerSystem());
                 Spectrum.AddMetaData("SoftwareID", ExtractLine(13));
-                Spectrum.AddMetaData("Resolution", ExtractLine(17+offset));
-                Spectrum.AddMetaData("InstrumentParameters", ExtractLine(24+offset));
-                Spectrum.AddMetaData("MonochromatorChange",  ExtractLine(41+offset));
-                Spectrum.AddMetaData("LampChange", ParseToDouble(ExtractLine(42+offset)).ToString());
+                Spectrum.AddMetaData("BandPass", ExtractLine(17 + offset));
+                Spectrum.AddMetaData("InstrumentParameters", ExtractLine(24 + offset));
+                Spectrum.AddMetaData("MonochromatorChange", ExtractLine(41 + offset));
+                Spectrum.AddMetaData("LampChange", ParseToDouble(ExtractLine(42 + offset)).ToString());
                 Spectrum.AddMetaData("DetectorChange", ExtractLine(43 + offset));
                 Spectrum.AddMetaData("SampleBeamPosition", ExtractLine(44 + offset));
                 Spectrum.AddMetaData("CommonBeamMask", ExtractLine(45 + offset));
@@ -106,6 +106,23 @@ namespace Bev.IO.SpectrumLoader
             {
                 // this is just a guess
                 Spectrum.AddMetaData("SpectrometerSystem", ExtractLine(20));
+            }
+        }
+
+        private void EstimateBandPass(int offset)
+        {
+            string line = ExtractLine(17 + offset);
+            string[] tokens = line.Split(new[] { '/', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length == 4)
+            {
+                Spectrum.AddMetaData("BandPass_UV", tokens[3].Trim());
+                Spectrum.AddMetaData("BandPass_NIR", tokens[1].Trim());
+            }
+            if (tokens.Length == 6)
+            {
+                Spectrum.AddMetaData("BandPass_UV", tokens[5].Trim());
+                Spectrum.AddMetaData("BandPass_NIR", tokens[3].Trim());
+                Spectrum.AddMetaData("BandPass_IR", tokens[1].Trim());
             }
         }
 
@@ -169,7 +186,7 @@ namespace Bev.IO.SpectrumLoader
 
         private void ParseSpectralData()
         {
-            if (FileIsInvalid()) 
+            if (FileIsInvalid())
                 return;
             int startIndex = GetIndexOfData() + 1;
             if (startIndex >= lines.Length)
