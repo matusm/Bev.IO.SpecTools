@@ -15,7 +15,7 @@ namespace SpecConverter
 
             string workingDirectory = Directory.GetCurrentDirectory();
             //string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
-            string[] filenames = { "Sample44.Sample_05.asc", "IR.asc" };
+            string[] filenames = { "MM04_009.Sample.ASC", "Si3N4_2020.asc" };
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
