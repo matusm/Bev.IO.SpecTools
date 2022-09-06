@@ -92,15 +92,17 @@ namespace Bev.IO.SpectrumLoader
                 Spectrum.AddMetaData("SpectrometerSerialNumber", ExtractLine(12));
                 Spectrum.AddMetaData("SpectrometerSystem", EstimateSpectrometerSystem());
                 Spectrum.AddMetaData("SoftwareID", ExtractLine(13));
-                Spectrum.AddMetaData("BandPass", ExtractLine(17 + offset));
                 Spectrum.AddMetaData("InstrumentParameters", ExtractLine(24 + offset));
                 Spectrum.AddMetaData("MonochromatorChange", ExtractLine(41 + offset));
-                Spectrum.AddMetaData("LampChange", ParseToDouble(ExtractLine(42 + offset)).ToString());
-                Spectrum.AddMetaData("DetectorChange", ExtractLine(43 + offset));
-                Spectrum.AddMetaData("SampleBeamPosition", ExtractLine(44 + offset));
+                Spectrum.AddMetaData("LampChange", ExtractLine(42 + offset));
+                AddDetectorChange(offset);
+                AddDetectorGains(offset);
                 Spectrum.AddMetaData("CommonBeamMask", ExtractLine(45 + offset));
                 Spectrum.AddMetaData("CommonBeamDepolarizer", ExtractLine(46 + offset));
                 Spectrum.AddMetaData("Attenuators", ExtractLine(47 + offset));
+                Spectrum.AddMetaData("SampleBeamPosition", ExtractLine(44 + offset));
+                AddBandPass(offset);
+                AddIntegrationTime(offset);
             }
             if (FileSignature == PeFileSignature.ValidVer160)
             {
@@ -109,20 +111,62 @@ namespace Bev.IO.SpectrumLoader
             }
         }
 
-        private void EstimateBandPass(int offset)
+        private void AddDetectorGains(int offset)
         {
-            string line = ExtractLine(17 + offset);
+            string line = ExtractLine(35 + offset);
             string[] tokens = line.Split(new[] { '/', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (tokens.Length == 4)
+            switch (tokens.Length)
             {
-                Spectrum.AddMetaData("BandPass_UV", tokens[3].Trim());
-                Spectrum.AddMetaData("BandPass_NIR", tokens[1].Trim());
+                case 4:
+                    Spectrum.AddMetaData("DetectorGain_UVVIS", "auto");
+                    Spectrum.AddMetaData("DetectorGain_NIR", tokens[3].Trim());
+                    Spectrum.AddMetaData("DetectorGain_IR", tokens[1].Trim());
+                    break;
+                default:
+                    Spectrum.AddMetaData($"DetectorGain", line);
+                    break;
             }
-            if (tokens.Length == 6)
+        }
+
+        private void AddDetectorChange(int offset)
+        {
+            AddMultiRegionParameter("DetectorChange", 43 + offset);
+        }
+
+        private void AddBandPass(int offset)
+        {
+            // either 17 or 31
+            AddMultiRegionParameter("BandPass", 17 + offset);
+        }
+
+        private void AddIntegrationTime(int offset)
+        {
+            // either 32 or 33
+            AddMultiRegionParameter("IntegrationTime", 32 + offset);
+        }
+
+        private void AddMultiRegionParameter(string key, int lineIndex)
+        {
+            string line = ExtractLine(lineIndex);
+            string[] tokens = line.Split(new[] { '/', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            switch (tokens.Length)
             {
-                Spectrum.AddMetaData("BandPass_UV", tokens[5].Trim());
-                Spectrum.AddMetaData("BandPass_NIR", tokens[3].Trim());
-                Spectrum.AddMetaData("BandPass_IR", tokens[1].Trim());
+                case 2:
+                    Spectrum.AddMetaData($"{key}_UVVIS", tokens[1].Trim());
+                    Spectrum.AddMetaData($"{key}_NIR", tokens[0].Trim());
+                    break;
+                case 4:
+                    Spectrum.AddMetaData($"{key}_UVVIS", tokens[3].Trim());
+                    Spectrum.AddMetaData($"{key}_NIR", tokens[1].Trim());
+                    break;
+                case 6:
+                    Spectrum.AddMetaData($"{key}_UVVIS", tokens[5].Trim());
+                    Spectrum.AddMetaData($"{key}_NIR", tokens[3].Trim());
+                    Spectrum.AddMetaData($"{key}_IR", tokens[1].Trim());
+                    break;
+                default:
+                    Spectrum.AddMetaData($"{key}", line);
+                    break;
             }
         }
 
