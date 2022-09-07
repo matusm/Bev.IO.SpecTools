@@ -93,6 +93,10 @@ namespace Bev.IO.SpectrumLoader
                 Spectrum.AddMetaData("SpectrometerSystem", EstimateSpectrometerSystem());
                 Spectrum.AddMetaData("SoftwareID", ExtractLine(13));
                 Spectrum.AddMetaData("InstrumentParameters", ExtractLine(24 + offset));
+                Spectrum.AddMetaData("CycleTime", ExtractLine(21 + offset));
+                Spectrum.AddMetaData("CycleNumber", ExtractLine(22 + offset));
+                Spectrum.AddMetaData("Cycles", ExtractLine(23 + offset));
+                Spectrum.AddMetaData("Lamps", ExtractLine(20 + offset));
                 Spectrum.AddMetaData("MonochromatorChange", ExtractLine(41 + offset));
                 Spectrum.AddMetaData("LampChange", ExtractLine(42 + offset));
                 AddDetectorChange(offset);
@@ -101,6 +105,8 @@ namespace Bev.IO.SpectrumLoader
                 Spectrum.AddMetaData("CommonBeamDepolarizer", ExtractLine(46 + offset));
                 Spectrum.AddMetaData("Attenuators", ExtractLine(47 + offset));
                 Spectrum.AddMetaData("SampleBeamPosition", ExtractLine(44 + offset));
+                Spectrum.AddMetaData("SlitMode_UV/VIS", ExtractLine(29 + offset));
+                Spectrum.AddMetaData("SlitMode_NIR", ExtractLine(30 + offset));
                 AddBandPass(offset);
                 AddIntegrationTime(offset);
             }
@@ -152,15 +158,15 @@ namespace Bev.IO.SpectrumLoader
             switch (tokens.Length)
             {
                 case 2:
-                    Spectrum.AddMetaData($"{key}_UVVIS", tokens[1].Trim());
+                    Spectrum.AddMetaData($"{key}_UV/VIS", tokens[1].Trim());
                     Spectrum.AddMetaData($"{key}_NIR", tokens[0].Trim());
                     break;
                 case 4:
-                    Spectrum.AddMetaData($"{key}_UVVIS", tokens[3].Trim());
+                    Spectrum.AddMetaData($"{key}_UV/VIS", tokens[3].Trim());
                     Spectrum.AddMetaData($"{key}_NIR", tokens[1].Trim());
                     break;
                 case 6:
-                    Spectrum.AddMetaData($"{key}_UVVIS", tokens[5].Trim());
+                    Spectrum.AddMetaData($"{key}_UV/VIS", tokens[5].Trim());
                     Spectrum.AddMetaData($"{key}_NIR", tokens[3].Trim());
                     Spectrum.AddMetaData($"{key}_IR", tokens[1].Trim());
                     break;
