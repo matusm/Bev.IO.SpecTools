@@ -15,19 +15,61 @@ namespace SpecConverter
 
             string workingDirectory = Directory.GetCurrentDirectory();
             //string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
-            string[] filenames = { "MM04_009.Sample.ASC", "Si3N4_2020.asc" };
+            string[] filenames = { "MM04_008.Sample.ASC", "MM04_009.Sample.ASC", "Si3N4_2020.asc" };
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
             {
-                //Spectrum spectrum = ProcessMmSpcFile(fn);
+                
                 Spectrum spectrum = LoadAsciiFile(fn);
-                //CsvWriter writer = new CsvWriter(spectrum);
-                //JcampWriter writer = new JcampWriter(spectrum);
-                MmSpcWriter writer = new MmSpcWriter(spectrum);
-                Console.WriteLine(writer.GetRecord());
+
+                WriteSpcFile(spectrum, fn);
+                WriteCsvFile(spectrum, fn);
+                WriteJcampFile(spectrum, fn);
+
+                Console.WriteLine($"{fn} - done.");
             }
 
+        }
+
+        private static void WriteSpcFile(Spectrum spectrum, string fileName)
+        {
+            string outFileName = Path.ChangeExtension(fileName, ".spc");
+            MmSpcWriter writer = new MmSpcWriter(spectrum);
+            WriteToFile(outFileName, writer.GetRecord());
+        }
+
+        private static void WriteCsvFile(Spectrum spectrum, string fileName)
+        {
+            string outFileName = Path.ChangeExtension(fileName, ".csv");
+            CsvWriter writer = new CsvWriter(spectrum);
+            WriteToFile(outFileName, writer.GetRecord());
+        }
+
+        private static void WriteJcampFile(Spectrum spectrum, string fileName)
+        {
+            string outFileName = Path.ChangeExtension(fileName, ".jdx");
+            JcampWriter writer = new JcampWriter(spectrum);
+            WriteToFile(outFileName, writer.GetRecord());
+        }
+
+        private static void WriteToFile(string outFileName, string data)
+        {
+            // check if data present
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+            // write the file
+            try
+            {
+                StreamWriter hOutFile = File.CreateText(outFileName);
+                hOutFile.Write(data);
+                hOutFile.Close();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            return;
         }
 
         private static Spectrum LoadMmSpcFile(string filename)
