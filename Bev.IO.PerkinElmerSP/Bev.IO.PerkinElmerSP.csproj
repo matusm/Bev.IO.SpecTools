@@ -4,14 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4B607A1A-8D7B-44D8-AC37-B064869C3380}</ProjectGuid>
+    <ProjectGuid>{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bev.IO.SpectrumPod</RootNamespace>
-    <AssemblyName>Bev.IO.SpectrumPod</AssemblyName>
+    <RootNamespace>Bev.IO.PerkinElmerSP</RootNamespace>
+    <AssemblyName>Bev.IO.PerkinElmerSP</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,11 +29,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="At.Matus.StatisticPod">
-      <HintPath>..\..\At.Matus.StatisticPod\bin\Release\At.Matus.StatisticPod.dll</HintPath>
-    </Reference>
     <Reference Include="CsvHelper, Version=28.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\packages\CsvHelper.28.0.1\lib\net47\CsvHelper.dll</HintPath>
     </Reference>
@@ -69,15 +67,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CsvWriter.cs" />
-    <Compile Include="HeaderRecord.cs" />
-    <Compile Include="JcampWriter.cs" />
-    <Compile Include="MetaData.cs" />
-    <Compile Include="MmSpcWriter.cs" />
-    <Compile Include="SpectralPoint.cs" />
-    <Compile Include="Spectrum.cs" />
+    <Compile Include="Block.cs" />
+    <Compile Include="BlockFile.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="IData.cs" />
+    <Compile Include="Spectrum2d.cs" />
+    <Compile Include="SpFileProvider.cs" />
+    <Compile Include="SpReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpectrumWriter.cs" />
+    <Compile Include="TypedMemberBlock.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

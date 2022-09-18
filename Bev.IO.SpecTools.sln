@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecConverter", "SpecConver
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.SpectrumLoader", "Bev.IO.SpectrumLoader\Bev.IO.SpectrumLoader.csproj", "{7FD08A02-BBB8-4C97-AB17-49779C2CA19E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bev.IO.PerkinElmerSP", "Bev.IO.PerkinElmerSP\Bev.IO.PerkinElmerSP.csproj", "{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{7FD08A02-BBB8-4C97-AB17-49779C2CA19E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FD08A02-BBB8-4C97-AB17-49779C2CA19E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FD08A02-BBB8-4C97-AB17-49779C2CA19E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
