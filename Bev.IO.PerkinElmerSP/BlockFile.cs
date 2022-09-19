@@ -27,10 +27,12 @@ namespace Bev.IO.PerkinElmerSP
             List<Block> blocks = new List<Block>(); //Todo: some capacity heuristics based on file length?
             try
             {
-                using BinaryReader r = new BinaryReader(file);
-                while (r.BaseStream.Position < r.BaseStream.Length)
+                using (BinaryReader binaryReader = new BinaryReader(file))
                 {
-                    blocks.Add(new Block(r));
+                    while (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length)
+                    {
+                        blocks.Add(new Block(binaryReader));
+                    }
                 }
             }
             catch (EndOfStreamException)

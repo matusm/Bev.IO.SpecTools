@@ -27,11 +27,11 @@ namespace Bev.IO.PerkinElmerSP
             Data = data;
         }
 
-        public Block(BinaryReader file)
+        public Block(BinaryReader binReader)
         {
-            Id = file.ReadInt16();
-            int len = file.ReadInt32();
-            Data = file.ReadBytes(len);
+            Id = binReader.ReadInt16();
+            int len = binReader.ReadInt32();
+            Data = binReader.ReadBytes(len);
             if (Data.Length < len) throw new EndOfStreamException();
         }
     }

@@ -86,13 +86,13 @@ namespace Bev.IO.PerkinElmerSP
         static IEnumerable<TypedMemberBlock> ParseMembers(byte[] data)
         {
             using MemoryStream ms = new MemoryStream(data);
-            using BinaryReader r = new BinaryReader(ms);
-            while (r.BaseStream.Position < r.BaseStream.Length)
+            using BinaryReader binReader = new BinaryReader(ms);
+            while (binReader.BaseStream.Position < binReader.BaseStream.Length)
             {
                 TypedMemberBlock b = null;
                 try
                 {
-                    b = new TypedMemberBlock(r);
+                    b = new TypedMemberBlock(binReader);
                 }
                 catch (EndOfStreamException)
                 {
@@ -102,11 +102,11 @@ namespace Bev.IO.PerkinElmerSP
             }
         }
 
-        public IData GetData(BlockFile file)
+        public IData GetData(BlockFile blockFile)
         {
             if (!BitConverter.IsLittleEndian)
                 throw new NotSupportedException("BigEndian architectures are not supported (yet).");
-            Block main = file.Contents.FirstOrDefault(x => x.Id == (short)MainBlock);
+            Block main = blockFile.Contents.FirstOrDefault(x => x.Id == (short)MainBlock);
             if (main == null)
                 throw new NotSupportedException($"This SP file doesn't contain a {Enum.GetName(typeof(BlockCodes), MainBlock)} block.");
             var spec = new Spectrum2d();

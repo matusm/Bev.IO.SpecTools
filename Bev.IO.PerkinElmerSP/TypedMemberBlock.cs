@@ -6,11 +6,11 @@ namespace Bev.IO.PerkinElmerSP
     {
         public short TypeCode { get; }
 
-        public TypedMemberBlock(BinaryReader file) : base(file.ReadInt16())
+        public TypedMemberBlock(BinaryReader binReader) : base(binReader.ReadInt16())
         {
-            int len = file.ReadInt32();
-            TypeCode = file.ReadInt16();
-            Data = file.ReadBytes(len - 2);
+            int len = binReader.ReadInt32();
+            TypeCode = binReader.ReadInt16();
+            Data = binReader.ReadBytes(len - 2);
         }
     }
 }
