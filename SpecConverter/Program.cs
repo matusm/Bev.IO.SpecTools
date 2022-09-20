@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Bev.IO.PerkinElmerSP;
 
 namespace SpecConverter
 {
@@ -14,20 +15,20 @@ namespace SpecConverter
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             string workingDirectory = Directory.GetCurrentDirectory();
-            //string[] filenames = Directory.GetFiles(workingDirectory, @"*.asc");
-            string[] filenames = { "MM04_008.Sample.ASC", "MM04_009.Sample.ASC", "Si3N4_2020.asc" };
+            string[] filenames = Directory.GetFiles(workingDirectory, @"*.sp");
+            //string[] filenames = { "MM04_008.Sample.ASC", "MM04_009.Sample.ASC", "Si3N4_2020.asc" };
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
             {
-                
-                Spectrum spectrum = LoadAsciiFile(fn);
-
-                WriteSpcFile(spectrum, fn);
-                WriteCsvFile(spectrum, fn);
-                WriteJcampFile(spectrum, fn);
-
-                Console.WriteLine($"{fn} - done.");
+                var testObj = new SpReader(fn);
+                testObj.DebugOutput();
+                Console.WriteLine();
+                //Spectrum spectrum = LoadAsciiFile(fn);
+                //WriteSpcFile(spectrum, fn);
+                //WriteCsvFile(spectrum, fn);
+                //WriteJcampFile(spectrum, fn);
+                //Console.WriteLine($"{fn} - done.");
             }
 
         }

@@ -81,5 +81,11 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bev.IO.PerkinElmerSP\Bev.IO.PerkinElmerSP.csproj">
+      <Project>{DA425FAB-AE19-4CBD-AF15-CEFB3B2039B8}</Project>
+      <Name>Bev.IO.PerkinElmerSP</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

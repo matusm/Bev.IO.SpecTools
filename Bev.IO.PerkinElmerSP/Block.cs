@@ -34,5 +34,7 @@ namespace Bev.IO.PerkinElmerSP
             Data = binReader.ReadBytes(len);
             if (Data.Length < len) throw new EndOfStreamException();
         }
+
+        public override string ToString() => $"Block[{(BlockCodes)Id} {Data.Length}]";
     }
 }

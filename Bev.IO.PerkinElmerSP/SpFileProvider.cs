@@ -16,6 +16,7 @@ namespace Bev.IO.PerkinElmerSP
         private static SpFileProvider _instance = new SpFileProvider();
         private SpFileProvider() { }
         public static SpFileProvider Instance { get => _instance; }
+        
         public string Extension { get; } = ".sp";
 
         static string ReadString(byte[] data)

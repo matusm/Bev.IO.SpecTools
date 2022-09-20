@@ -12,5 +12,7 @@ namespace Bev.IO.PerkinElmerSP
             TypeCode = binReader.ReadInt16();
             Data = binReader.ReadBytes(len - 2);
         }
+
+        public override string ToString() => $"TypedMemberBlock[{(BlockCodes)Id} {(BlockCodes)TypeCode} {Data.Length}]";
     }
 }
