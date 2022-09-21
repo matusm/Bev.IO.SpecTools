@@ -16,26 +16,114 @@ namespace Bev.IO.PerkinElmerSP
         private BlockFile blockFile;
         private List<TypedMemberBlock> memberBlocks = new List<TypedMemberBlock>();
 
+        public uint CheckSum { get; private set; }
+        public double ResolutionX { get; private set; }
+        public double StartX { get; private set; }
+        public double EndX { get; private set; }
+        public string Name { get; private set; }
+        public string Alias { get; private set; }
+        public int NumPoints { get; private set; }
+
         public SpReader(string fileName)
         {
             FileStream fileStream = new FileStream(fileName, FileMode.Open);
             blockFile = new BlockFile(fileStream);
             AnalyseMainBlock(blockFile);
+            Interpreter();
         }
 
         public void DebugOutput()
         {
             Console.WriteLine("============================================================");
+            Console.WriteLine($"Description: {blockFile.Description}");
             foreach (var block in blockFile.Contents)
-            {
                 Console.WriteLine(block);
-            }
+            var data = blockFile.Contents.Last().Data;
+            Console.WriteLine($"last block data: {ToPrettyString(data)}");
             Console.WriteLine("============================================================");
             foreach (var typedBlock in memberBlocks)
-            {
                 Console.WriteLine(typedBlock);
-            }
             Console.WriteLine("============================================================");
+            Console.WriteLine($"Checksum:   {CheckSum}");
+            Console.WriteLine($"Resolution: {ResolutionX}");
+            Console.WriteLine($"StartX:     {StartX}");
+            Console.WriteLine($"EndX:       {EndX}");
+            Console.WriteLine($"Name:       {Name}"); 
+            Console.WriteLine($"Alias:      {Alias}");
+            Console.WriteLine($"NumPoints:  {NumPoints}");
+            Console.WriteLine("============================================================");
+        }
+
+        private void Interpreter()
+        {
+            foreach (TypedMemberBlock tmb in memberBlocks)
+                Interpreter(tmb);
+        }
+
+        private void Interpreter(TypedMemberBlock tmb)
+        {
+            switch ((BlockCodes)tmb.Id)
+            {
+                case BlockCodes.DataSetDataType:
+                    break;
+                case BlockCodes.DataSetAbscissaRange:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
+                    {
+                        StartX = BitConverter.ToDouble(tmb.Data, 0);
+                        EndX = BitConverter.ToDouble(tmb.Data, SizeofDouble);
+                    }
+                    break;
+                case BlockCodes.DataSetOrdinateRange:
+                    break;
+                case BlockCodes.DataSetInterval:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrd)
+                        ResolutionX = BitConverter.ToDouble(tmb.Data, 0);
+                    break;
+                case BlockCodes.DataSetNumPoints:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Long)
+                        NumPoints = BitConverter.ToInt32(tmb.Data, 0);
+                    break;
+                case BlockCodes.DataSetSamplingMethod:
+                    break;
+                case BlockCodes.DataSetXAxisLabel:
+                    break;
+                case BlockCodes.DataSetYAxisLabel:
+                    break;
+                case BlockCodes.DataSetXAxisUnitType:
+                    break;
+                case BlockCodes.DataSetYAxisUnitType:
+                    break;
+                case BlockCodes.DataSetFileType:
+                    break;
+                case BlockCodes.DataSetData:
+                    break;
+                case BlockCodes.DataSetName:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
+                        Name = ReadString(tmb.Data);
+                    break;
+                case BlockCodes.DataSetChecksum:
+                    if((BlockCodes)tmb.TypeCode == BlockCodes.ULong)
+                        CheckSum = BitConverter.ToUInt32(tmb.Data, 0);
+                    break;
+                case BlockCodes.DataSetHistoryRecord:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
+                        ReadString(tmb.Data); // TODO does not work !?
+                    break;
+                case BlockCodes.DataSetInvalidRegion:
+                    break;
+                case BlockCodes.DataSetAlias:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
+                        Alias = ReadString(tmb.Data);
+                    break;
+                case BlockCodes.DataSetVXIRAccyHdr:
+                    break;
+                case BlockCodes.DataSetVXIRQualHdr:
+                    break;
+                case BlockCodes.DataSetEventMarkers:
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -82,7 +170,13 @@ namespace Bev.IO.PerkinElmerSP
             }
         }
 
-
+        private string ToPrettyString(byte[] data)
+        {
+            string str = "";
+            foreach (var b in data)
+                str += $"{b:X2} ";
+            return str;
+        }
 
     }
 }
