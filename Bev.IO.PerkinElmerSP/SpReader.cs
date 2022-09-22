@@ -20,9 +20,17 @@ namespace Bev.IO.PerkinElmerSP
         public double ResolutionX { get; private set; }
         public double StartX { get; private set; }
         public double EndX { get; private set; }
+        public double MinY { get; private set; }
+        public double MaxY { get; private set; }
         public string Name { get; private set; }
         public string Alias { get; private set; }
         public int NumPoints { get; private set; }
+        public UInt16 DataType { get; private set; }
+        public string LabelX { get; private set; }
+        public string LabelY { get; private set; }
+        public string FileType { get; private set; }
+        public string Sampling { get; private set; }
+
 
         public SpReader(string fileName)
         {
@@ -45,12 +53,19 @@ namespace Bev.IO.PerkinElmerSP
                 Console.WriteLine(typedBlock);
             Console.WriteLine("============================================================");
             Console.WriteLine($"Checksum:   {CheckSum}");
+            Console.WriteLine($"NumPoints:  {NumPoints}");
             Console.WriteLine($"Resolution: {ResolutionX}");
             Console.WriteLine($"StartX:     {StartX}");
             Console.WriteLine($"EndX:       {EndX}");
+            Console.WriteLine($"MinY:       {MinY}");
+            Console.WriteLine($"MaxY:       {MaxY}");
             Console.WriteLine($"Name:       {Name}"); 
             Console.WriteLine($"Alias:      {Alias}");
-            Console.WriteLine($"NumPoints:  {NumPoints}");
+            Console.WriteLine($"LabelX:     {LabelX}");
+            Console.WriteLine($"LabelY:     {LabelY}");
+            Console.WriteLine($"FileType:   {FileType}");
+            Console.WriteLine($"Sampling:   {Sampling}");
+            Console.WriteLine($"DataType:   {DataType}");
             Console.WriteLine("============================================================");
         }
 
@@ -65,6 +80,8 @@ namespace Bev.IO.PerkinElmerSP
             switch ((BlockCodes)tmb.Id)
             {
                 case BlockCodes.DataSetDataType:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.UInt)
+                        DataType = BitConverter.ToUInt16(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetAbscissaRange:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
@@ -74,6 +91,11 @@ namespace Bev.IO.PerkinElmerSP
                     }
                     break;
                 case BlockCodes.DataSetOrdinateRange:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
+                    {
+                        MinY = BitConverter.ToDouble(tmb.Data, 0);
+                        MaxY = BitConverter.ToDouble(tmb.Data, SizeofDouble);
+                    }
                     break;
                 case BlockCodes.DataSetInterval:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrd)
@@ -84,16 +106,26 @@ namespace Bev.IO.PerkinElmerSP
                         NumPoints = BitConverter.ToInt32(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetSamplingMethod:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
+                        Sampling = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetXAxisLabel:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
+                        LabelX = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetYAxisLabel:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
+                        LabelY = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetXAxisUnitType:
+                    //Console.WriteLine(ToPrettyString(tmb.Data));
                     break;
                 case BlockCodes.DataSetYAxisUnitType:
+                    //Console.WriteLine(ToPrettyString(tmb.Data));
                     break;
                 case BlockCodes.DataSetFileType:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
+                        FileType = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetData:
                     break;
@@ -107,7 +139,7 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetHistoryRecord:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
-                        ReadString(tmb.Data); // TODO does not work !?
+                        XYZZY(tmb.Data); // TODO does not work !?
                     break;
                 case BlockCodes.DataSetInvalidRegion:
                     break;
@@ -126,6 +158,24 @@ namespace Bev.IO.PerkinElmerSP
             }
         }
 
+        private void XYZZY(byte[] data)
+        {
+            using MemoryStream ms = new MemoryStream(data);
+            using BinaryReader binReader = new BinaryReader(ms);
+            while (binReader.BaseStream.Position < binReader.BaseStream.Length)
+            {
+                Block tmb = null;
+                try
+                {
+                    tmb = new Block(binReader);
+                    Console.WriteLine(">>>>" + tmb);
+                }
+                catch (EndOfStreamException)
+                {
+                    break;
+                }
+            }
+        }
 
         private void AnalyseMainBlock(BlockFile blockFile)
         {
