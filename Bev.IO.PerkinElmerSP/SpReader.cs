@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bev.IO.PerkinElmerSP
 {
@@ -16,20 +15,20 @@ namespace Bev.IO.PerkinElmerSP
         private BlockFile blockFile;
         private List<TypedMemberBlock> memberBlocks = new List<TypedMemberBlock>();
 
-        public uint CheckSum { get; private set; }
-        public double ResolutionX { get; private set; }
-        public double StartX { get; private set; }
-        public double EndX { get; private set; }
-        public double MinY { get; private set; }
-        public double MaxY { get; private set; }
-        public string Name { get; private set; }
-        public string Alias { get; private set; }
-        public int NumPoints { get; private set; }
-        public UInt16 DataType { get; private set; }
-        public string LabelX { get; private set; }
-        public string LabelY { get; private set; }
-        public string FileType { get; private set; }
-        public string Sampling { get; private set; }
+        public uint SPCheckSum { get; private set; }
+        public double SPResolutionX { get; private set; }
+        public double SPStartX { get; private set; }
+        public double SPEndX { get; private set; }
+        public double SPMinY { get; private set; }
+        public double SPMaxY { get; private set; }
+        public string SPName { get; private set; }
+        public string SPAlias { get; private set; }
+        public int SPNumPoints { get; private set; }
+        public UInt16 SPDataType { get; private set; }
+        public string SPLabelX { get; private set; }
+        public string SPLabelY { get; private set; }
+        public string SPFileType { get; private set; }
+        public string SPSampling { get; private set; }
 
 
         public SpReader(string fileName)
@@ -52,20 +51,20 @@ namespace Bev.IO.PerkinElmerSP
             foreach (var typedBlock in memberBlocks)
                 Console.WriteLine(typedBlock);
             Console.WriteLine("============================================================");
-            Console.WriteLine($"Checksum:   {CheckSum}");
-            Console.WriteLine($"NumPoints:  {NumPoints}");
-            Console.WriteLine($"Resolution: {ResolutionX}");
-            Console.WriteLine($"StartX:     {StartX}");
-            Console.WriteLine($"EndX:       {EndX}");
-            Console.WriteLine($"MinY:       {MinY}");
-            Console.WriteLine($"MaxY:       {MaxY}");
-            Console.WriteLine($"Name:       {Name}"); 
-            Console.WriteLine($"Alias:      {Alias}");
-            Console.WriteLine($"LabelX:     {LabelX}");
-            Console.WriteLine($"LabelY:     {LabelY}");
-            Console.WriteLine($"FileType:   {FileType}");
-            Console.WriteLine($"Sampling:   {Sampling}");
-            Console.WriteLine($"DataType:   {DataType}");
+            Console.WriteLine($"Checksum:   {SPCheckSum}");
+            Console.WriteLine($"NumPoints:  {SPNumPoints}");
+            Console.WriteLine($"Resolution: {SPResolutionX}");
+            Console.WriteLine($"StartX:     {SPStartX}");
+            Console.WriteLine($"EndX:       {SPEndX}");
+            Console.WriteLine($"MinY:       {SPMinY}");
+            Console.WriteLine($"MaxY:       {SPMaxY}");
+            Console.WriteLine($"Name:       {SPName}"); 
+            Console.WriteLine($"Alias:      {SPAlias}");
+            Console.WriteLine($"LabelX:     {SPLabelX}");
+            Console.WriteLine($"LabelY:     {SPLabelY}");
+            Console.WriteLine($"FileType:   {SPFileType}");
+            Console.WriteLine($"Sampling:   {SPSampling}");
+            Console.WriteLine($"DataType:   {SPDataType}");
             Console.WriteLine("============================================================");
         }
 
@@ -81,41 +80,41 @@ namespace Bev.IO.PerkinElmerSP
             {
                 case BlockCodes.DataSetDataType:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.UInt)
-                        DataType = BitConverter.ToUInt16(tmb.Data, 0);
+                        SPDataType = BitConverter.ToUInt16(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetAbscissaRange:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
                     {
-                        StartX = BitConverter.ToDouble(tmb.Data, 0);
-                        EndX = BitConverter.ToDouble(tmb.Data, SizeofDouble);
+                        SPStartX = BitConverter.ToDouble(tmb.Data, 0);
+                        SPEndX = BitConverter.ToDouble(tmb.Data, SizeofDouble);
                     }
                     break;
                 case BlockCodes.DataSetOrdinateRange:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
                     {
-                        MinY = BitConverter.ToDouble(tmb.Data, 0);
-                        MaxY = BitConverter.ToDouble(tmb.Data, SizeofDouble);
+                        SPMinY = BitConverter.ToDouble(tmb.Data, 0);
+                        SPMaxY = BitConverter.ToDouble(tmb.Data, SizeofDouble);
                     }
                     break;
                 case BlockCodes.DataSetInterval:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrd)
-                        ResolutionX = BitConverter.ToDouble(tmb.Data, 0);
+                        SPResolutionX = BitConverter.ToDouble(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetNumPoints:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Long)
-                        NumPoints = BitConverter.ToInt32(tmb.Data, 0);
+                        SPNumPoints = BitConverter.ToInt32(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetSamplingMethod:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        Sampling = ReadString(tmb.Data);
+                        SPSampling = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetXAxisLabel:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        LabelX = ReadString(tmb.Data);
+                        SPLabelX = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetYAxisLabel:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        LabelY = ReadString(tmb.Data);
+                        SPLabelY = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetXAxisUnitType:
                     //Console.WriteLine(ToPrettyString(tmb.Data));
@@ -125,17 +124,17 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetFileType:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        FileType = ReadString(tmb.Data);
+                        SPFileType = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetData:
                     break;
                 case BlockCodes.DataSetName:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        Name = ReadString(tmb.Data);
+                        SPName = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetChecksum:
                     if((BlockCodes)tmb.TypeCode == BlockCodes.ULong)
-                        CheckSum = BitConverter.ToUInt32(tmb.Data, 0);
+                        SPCheckSum = BitConverter.ToUInt32(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetHistoryRecord:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
@@ -145,7 +144,7 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetAlias:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        Alias = ReadString(tmb.Data);
+                        SPAlias = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetVXIRAccyHdr:
                     break;
