@@ -18,6 +18,7 @@ namespace Bev.IO.PerkinElmerSP
         private double[] pointsY;
 
         public Spectrum Spectrum { get; private set; }
+        public string[] HdrHistory { get; private set; }
 
         public uint SPCheckSum { get; private set; }
         public int SPNumPoints { get; private set; }
@@ -40,32 +41,31 @@ namespace Bev.IO.PerkinElmerSP
             FileStream fileStream = new FileStream(path, FileMode.Open);
             blockFile = new BlockFile(fileStream);
             AnalyseMainBlock(blockFile);
-            Interpreter();
+            InterpretKnownBlocks();
             Spectrum = new Spectrum();
             Spectrum.SourceFileName = Path.GetFileName(path);
             Spectrum.SourceFileCreationDate = File.GetCreationTimeUtc(path);
-            FillSpectrumPod();
+            BuildSpectrumPod();
         }
 
         public void DebugOutput()
         {
             Console.WriteLine("============================================================");
-            Console.WriteLine($"Description: {blockFile.Description}");
             foreach (var block in blockFile.Contents)
                 Console.WriteLine(block);
             var data = blockFile.Contents.Last().Data;
-            Console.WriteLine($"last block data: {ToPrettyString(data)}");
+            Console.WriteLine($"last block data: {BytesToHex(data)}");
             Console.WriteLine("============================================================");
             foreach (var typedBlock in memberBlocks)
                 Console.WriteLine(typedBlock);
             Console.WriteLine("============================================================");
             Console.WriteLine($"Checksum:   {SPCheckSum}");
-            Console.WriteLine($"NumPoints:  {SPNumPoints}");
-            Console.WriteLine($"Resolution: {SPResolutionX}");
-            Console.WriteLine($"StartX:     {SPStartX}");
-            Console.WriteLine($"EndX:       {SPEndX}");
-            Console.WriteLine($"MinY:       {SPMinY}");
-            Console.WriteLine($"MaxY:       {SPMaxY}");
+            //Console.WriteLine($"NumPoints:  {SPNumPoints}");
+            //Console.WriteLine($"Resolution: {SPResolutionX}");
+            //Console.WriteLine($"StartX:     {SPStartX}");
+            //Console.WriteLine($"EndX:       {SPEndX}");
+            //Console.WriteLine($"MinY:       {SPMinY}");
+            //Console.WriteLine($"MaxY:       {SPMaxY}");
             Console.WriteLine($"Name:       {SPName}");
             Console.WriteLine($"Alias:      {SPAlias}");
             Console.WriteLine($"LabelX:     {SPLabelX}");
@@ -74,17 +74,20 @@ namespace Bev.IO.PerkinElmerSP
             Console.WriteLine($"Sampling:   {SPSampling}");
             Console.WriteLine($"DataType:   {SPDataType}");
             Console.WriteLine("============================================================");
-            //RecordSpectralData();
-            //Console.WriteLine("============================================================");
+            for (int i = 0; i < HdrHistory.Length; i++)
+            {
+                Console.WriteLine($"{i,2} : >{HdrHistory[i]}<");
+            }
+            Console.WriteLine("============================================================");
         }
 
-        private void Interpreter()
+        private void InterpretKnownBlocks()
         {
             foreach (TypedMemberBlock tmb in memberBlocks)
-                Interpreter(tmb);
+                InterpretBlock(tmb);
         }
 
-        private void Interpreter(TypedMemberBlock tmb)
+        private void InterpretBlock(TypedMemberBlock tmb)
         {
             switch ((BlockCodes)tmb.Id)
             {
@@ -116,15 +119,15 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetSamplingMethod:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPSampling = ReadString(tmb.Data);
+                        SPSampling = BytesToString(tmb.Data);
                     break;
                 case BlockCodes.DataSetXAxisLabel:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPLabelX = ReadString(tmb.Data);
+                        SPLabelX = BytesToString(tmb.Data);
                     break;
                 case BlockCodes.DataSetYAxisLabel:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPLabelY = ReadString(tmb.Data);
+                        SPLabelY = BytesToString(tmb.Data);
                     break;
                 case BlockCodes.DataSetXAxisUnitType:
                     //Console.WriteLine(ToPrettyString(tmb.Data));
@@ -134,7 +137,7 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetFileType:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPFileType = ReadString(tmb.Data);
+                        SPFileType = BytesToString(tmb.Data);
                     break;
                 case BlockCodes.DataSetData:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdArray)
@@ -156,7 +159,7 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetName:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPName = ReadString(tmb.Data);
+                        SPName = BytesToString(tmb.Data);
                     break;
                 case BlockCodes.DataSetChecksum:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.ULong)
@@ -164,13 +167,13 @@ namespace Bev.IO.PerkinElmerSP
                     break;
                 case BlockCodes.DataSetHistoryRecord:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
-                        XYZZY(tmb.Data); // TODO does not work !?
+                        HdrHistory = _XYZZY(tmb.Data);
                     break;
                 case BlockCodes.DataSetInvalidRegion:
                     break;
                 case BlockCodes.DataSetAlias:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPAlias = ReadString(tmb.Data);
+                        SPAlias = BytesToString(tmb.Data);
                     break;
                 case BlockCodes.DataSetVXIRAccyHdr:
                     break;
@@ -183,7 +186,7 @@ namespace Bev.IO.PerkinElmerSP
             }
         }
 
-        private void FillSpectrumPod()
+        private void BuildSpectrumPod()
         {
             double x = SPStartX;
             foreach (var y in pointsY)
@@ -200,23 +203,19 @@ namespace Bev.IO.PerkinElmerSP
             Spectrum.AddMetaData("SPSampling", SPSampling);
         }
 
-        private void XYZZY(byte[] data)
+        private string[] _XYZZY(byte[] data)
         {
-            using MemoryStream ms = new MemoryStream(data);
-            using BinaryReader binReader = new BinaryReader(ms);
-            while (binReader.BaseStream.Position < binReader.BaseStream.Length)
+            if (data.Length < 5) return null;
+            List<string> hdrLines = new List<string>();
+            for (int i = 1; i < data.Length-1; i++)
             {
-                Block tmb = null;
-                try
+                if(data[i-1] == 0x23 && data[i] == 0x75)
                 {
-                    tmb = new Block(binReader);
-                    Console.WriteLine(">>>>" + tmb);
-                }
-                catch (EndOfStreamException)
-                {
-                    break;
+                    int len = BitConverter.ToInt16(data, i+1);
+                    hdrLines.Add(Encoding.ASCII.GetString(data, i+3, len));
                 }
             }
+            return hdrLines.ToArray();
         }
 
         private void AnalyseMainBlock(BlockFile blockFile)
@@ -226,10 +225,10 @@ namespace Bev.IO.PerkinElmerSP
             Block main = blockFile.Contents.FirstOrDefault(x => x.Id == (short)MainBlock);
             if (main == null)
                 throw new NotSupportedException($"This SP file doesn't contain a {Enum.GetName(typeof(BlockCodes), MainBlock)} block.");
-            ParseAndAddMembers(main.Data);
+            SplitToMemberBlocks(main.Data);
         }
 
-        private void ParseAndAddMembers(byte[] data)
+        private void SplitToMemberBlocks(byte[] data)
         {
             using MemoryStream ms = new MemoryStream(data);
             using BinaryReader binReader = new BinaryReader(ms);
@@ -248,7 +247,7 @@ namespace Bev.IO.PerkinElmerSP
             }
         }
 
-        private string ReadString(byte[] data)
+        private string BytesToString(byte[] data)
         {
             try
             {
@@ -262,7 +261,7 @@ namespace Bev.IO.PerkinElmerSP
             }
         }
 
-        private string ToPrettyString(byte[] data)
+        private string BytesToHex(byte[] data)
         {
             string str = "";
             foreach (var b in data)

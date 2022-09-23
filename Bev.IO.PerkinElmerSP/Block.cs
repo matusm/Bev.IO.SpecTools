@@ -22,11 +22,6 @@ namespace Bev.IO.PerkinElmerSP
             Id = id;
         }
 
-        public Block(short id, byte[] data) : this(id)
-        {
-            Data = data;
-        }
-
         public Block(BinaryReader binReader)
         {
             Id = binReader.ReadInt16();
