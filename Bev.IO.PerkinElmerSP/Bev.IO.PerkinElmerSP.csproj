@@ -84,5 +84,11 @@
   <ItemGroup>
     <Content Include="TextFile1.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bev.IO.SpectrumPod\Bev.IO.SpectrumPod.csproj">
+      <Project>{4B607A1A-8D7B-44D8-AC37-B064869C3380}</Project>
+      <Name>Bev.IO.SpectrumPod</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

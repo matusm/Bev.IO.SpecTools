@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bev.IO.SpectrumPod;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,8 +15,13 @@ namespace Bev.IO.PerkinElmerSP
 
         private BlockFile blockFile;
         private List<TypedMemberBlock> memberBlocks = new List<TypedMemberBlock>();
+        private double[] pointsY;
+
+        public Spectrum Spectrum { get; private set; }
 
         public uint SPCheckSum { get; private set; }
+        public int SPNumPoints { get; private set; }
+        public UInt16 SPDataType { get; private set; }
         public double SPResolutionX { get; private set; }
         public double SPStartX { get; private set; }
         public double SPEndX { get; private set; }
@@ -23,20 +29,22 @@ namespace Bev.IO.PerkinElmerSP
         public double SPMaxY { get; private set; }
         public string SPName { get; private set; }
         public string SPAlias { get; private set; }
-        public int SPNumPoints { get; private set; }
-        public UInt16 SPDataType { get; private set; }
         public string SPLabelX { get; private set; }
         public string SPLabelY { get; private set; }
         public string SPFileType { get; private set; }
         public string SPSampling { get; private set; }
 
 
-        public SpReader(string fileName)
+        public SpReader(string path)
         {
-            FileStream fileStream = new FileStream(fileName, FileMode.Open);
+            FileStream fileStream = new FileStream(path, FileMode.Open);
             blockFile = new BlockFile(fileStream);
             AnalyseMainBlock(blockFile);
             Interpreter();
+            Spectrum = new Spectrum();
+            Spectrum.SourceFileName = Path.GetFileName(path);
+            Spectrum.SourceFileCreationDate = File.GetCreationTimeUtc(path);
+            FillSpectrumPod();
         }
 
         public void DebugOutput()
@@ -58,7 +66,7 @@ namespace Bev.IO.PerkinElmerSP
             Console.WriteLine($"EndX:       {SPEndX}");
             Console.WriteLine($"MinY:       {SPMinY}");
             Console.WriteLine($"MaxY:       {SPMaxY}");
-            Console.WriteLine($"Name:       {SPName}"); 
+            Console.WriteLine($"Name:       {SPName}");
             Console.WriteLine($"Alias:      {SPAlias}");
             Console.WriteLine($"LabelX:     {SPLabelX}");
             Console.WriteLine($"LabelY:     {SPLabelY}");
@@ -66,6 +74,8 @@ namespace Bev.IO.PerkinElmerSP
             Console.WriteLine($"Sampling:   {SPSampling}");
             Console.WriteLine($"DataType:   {SPDataType}");
             Console.WriteLine("============================================================");
+            //RecordSpectralData();
+            //Console.WriteLine("============================================================");
         }
 
         private void Interpreter()
@@ -127,13 +137,29 @@ namespace Bev.IO.PerkinElmerSP
                         SPFileType = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetData:
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdArray)
+                    {
+                        if (pointsY == null)
+                            pointsY = new double[BitConverter.ToInt32(tmb.Data, 0) / SizeofDouble];
+                        try
+                        {
+                            for (int i = 0; i < pointsY.Length; i++)
+                            {
+                                pointsY[i] = BitConverter.ToDouble(tmb.Data, DataMemberDataOffset + i * SizeofDouble);
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            Console.WriteLine("Warning: an unexpected end of data member block has been encountered.");
+                        }
+                    }
                     break;
                 case BlockCodes.DataSetName:
                     if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
                         SPName = ReadString(tmb.Data);
                     break;
                 case BlockCodes.DataSetChecksum:
-                    if((BlockCodes)tmb.TypeCode == BlockCodes.ULong)
+                    if ((BlockCodes)tmb.TypeCode == BlockCodes.ULong)
                         SPCheckSum = BitConverter.ToUInt32(tmb.Data, 0);
                     break;
                 case BlockCodes.DataSetHistoryRecord:
@@ -155,6 +181,23 @@ namespace Bev.IO.PerkinElmerSP
                 default:
                     break;
             }
+        }
+
+        private void FillSpectrumPod()
+        {
+            double x = SPStartX;
+            foreach (var y in pointsY)
+            {
+                Spectrum.AddDataValue(x, y);
+                x += SPResolutionX;
+            }
+            Spectrum.SetUnitNames(SPLabelX, SPLabelY);
+            Spectrum.AddMetaData("SPName", SPName);
+            Spectrum.AddMetaData("SPAlias", SPAlias);
+            Spectrum.AddMetaData("Description", blockFile.Description);
+            Spectrum.AddMetaData("SPDataType", SPDataType.ToString());
+            Spectrum.AddMetaData("SPFileType", SPFileType);
+            Spectrum.AddMetaData("SPSampling", SPSampling);
         }
 
         private void XYZZY(byte[] data)

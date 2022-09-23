@@ -21,14 +21,11 @@ namespace SpecConverter
 
             foreach (string fn in filenames)
             {
-                var testObj = new SpReader(fn);
-                testObj.DebugOutput();
-                Console.WriteLine();
-                //Spectrum spectrum = LoadAsciiFile(fn);
-                //WriteSpcFile(spectrum, fn);
+                Spectrum spectrum = LoadSpFile(fn);
+                WriteSpcFile(spectrum, fn);
                 //WriteCsvFile(spectrum, fn);
                 //WriteJcampFile(spectrum, fn);
-                //Console.WriteLine($"{fn} - done.");
+                Console.WriteLine($"{fn} - done.");
             }
 
         }
@@ -89,6 +86,13 @@ namespace SpecConverter
             AsciiReader aReader = new AsciiReader(sFile);
             Spectrum spectrum = aReader.Spectrum;
             return spectrum;
+        }
+
+        private static Spectrum LoadSpFile(string filename)
+        {
+            SpReader spReader = new SpReader(filename);
+            spReader.DebugOutput();
+            return spReader.Spectrum;
         }
     }
 }
