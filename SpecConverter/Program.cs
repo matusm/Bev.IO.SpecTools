@@ -14,18 +14,18 @@ namespace SpecConverter
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            string workingDirectory = Directory.GetCurrentDirectory();
+            //string workingDirectory = Directory.GetCurrentDirectory();
+            string workingDirectory = @"C:\Users\User\Desktop\sp_examples";
             string[] filenames = Directory.GetFiles(workingDirectory, @"*.sp");
-            //string[] filenames = { "MM04_008.Sample.ASC", "MM04_009.Sample.ASC", "Si3N4_2020.asc" };
+            //string[] filenames = { "Sample27.Sample.sp", "Sample28.Sample.sp" };
             Array.Sort(filenames);
 
             foreach (string fn in filenames)
             {
                 Spectrum spectrum = LoadSpFile(fn);
-                WriteSpcFile(spectrum, fn);
+                //WriteSpcFile(spectrum, fn);
                 //WriteCsvFile(spectrum, fn);
                 //WriteJcampFile(spectrum, fn);
-                Console.WriteLine($"{fn} - done.");
             }
 
         }
@@ -91,7 +91,12 @@ namespace SpecConverter
         private static Spectrum LoadSpFile(string filename)
         {
             SpReader spReader = new SpReader(filename);
-            spReader.DebugOutput();
+            //spReader.DebugOutput();
+            Console.WriteLine($"# Lines {spReader.HdrHistory.Length} <- {spReader.FileName}");
+            string outFileName = Path.GetFileName(filename);
+            outFileName = Path.ChangeExtension(outFileName, ".txt");
+            outFileName = $"{spReader.HdrHistory.Length}_" + outFileName;
+            WriteToFile(outFileName, spReader.DebugHdrHistory());
             return spReader.Spectrum;
         }
     }

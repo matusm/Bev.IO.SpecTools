@@ -34,9 +34,6 @@
     <Reference Include="Bev.IO.SpectrumPod">
       <HintPath>..\Bev.IO.SpectrumPod\bin\Release\Bev.IO.SpectrumPod.dll</HintPath>
     </Reference>
-    <Reference Include="CsvHelper, Version=28.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
-      <HintPath>..\packages\CsvHelper.28.0.1\lib\net47\CsvHelper.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>

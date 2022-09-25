@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Bev.IO.PerkinElmerSP
 {
@@ -13,13 +14,16 @@ namespace Bev.IO.PerkinElmerSP
         private const int DataMemberDataOffset = 4;
         private const int SizeofDouble = 8;
 
-        private BlockFile blockFile;
-        private List<TypedMemberBlock> memberBlocks = new List<TypedMemberBlock>();
-        private double[] pointsY;
+        private readonly BlockFile blockFile;
+        private readonly List<TypedBlock> memberBlocks = new List<TypedBlock>();
+        private double[] pointsY;   // temporary place for the spectrum
 
         public Spectrum Spectrum { get; private set; }
-        public string[] HdrHistory { get; private set; }
+        public string FileName { get; }
+        public DateTime FileCreationDate { get; }
 
+        // TODO mak all private
+        public string[] HdrHistory { get; private set; }
         public uint SPCheckSum { get; private set; }
         public int SPNumPoints { get; private set; }
         public UInt16 SPDataType { get; private set; }
@@ -35,17 +39,29 @@ namespace Bev.IO.PerkinElmerSP
         public string SPFileType { get; private set; }
         public string SPSampling { get; private set; }
 
-
         public SpReader(string path)
         {
             FileStream fileStream = new FileStream(path, FileMode.Open);
+            FileName = Path.GetFileName(path);
+            FileCreationDate = File.GetCreationTimeUtc(path);
             blockFile = new BlockFile(fileStream);
             AnalyseMainBlock(blockFile);
-            InterpretKnownBlocks();
+            InterpretKnownTypedBlocks();
             Spectrum = new Spectrum();
-            Spectrum.SourceFileName = Path.GetFileName(path);
-            Spectrum.SourceFileCreationDate = File.GetCreationTimeUtc(path);
+            Spectrum.SourceFileName = FileName;
+            Spectrum.SourceFileCreationDate = FileCreationDate;
             BuildSpectrumPod();
+        }
+
+        public string DebugHdrHistory()
+        {
+            if (HdrHistory == null) return "no HDR history";
+            if (HdrHistory.Length < 1) return "no HDR history";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"HDR history of file {FileName}");
+            for (int i = 0; i < HdrHistory.Length; i++)
+                sb.AppendLine($"{i,2} : >{HdrHistory[i]}<");
+            return sb.ToString();
         }
 
         public void DebugOutput()
@@ -59,75 +75,55 @@ namespace Bev.IO.PerkinElmerSP
             foreach (var typedBlock in memberBlocks)
                 Console.WriteLine(typedBlock);
             Console.WriteLine("============================================================");
-            Console.WriteLine($"Checksum:   {SPCheckSum}");
-            //Console.WriteLine($"NumPoints:  {SPNumPoints}");
-            //Console.WriteLine($"Resolution: {SPResolutionX}");
-            //Console.WriteLine($"StartX:     {SPStartX}");
-            //Console.WriteLine($"EndX:       {SPEndX}");
-            //Console.WriteLine($"MinY:       {SPMinY}");
-            //Console.WriteLine($"MaxY:       {SPMaxY}");
-            Console.WriteLine($"Name:       {SPName}");
-            Console.WriteLine($"Alias:      {SPAlias}");
-            Console.WriteLine($"LabelX:     {SPLabelX}");
-            Console.WriteLine($"LabelY:     {SPLabelY}");
-            Console.WriteLine($"FileType:   {SPFileType}");
-            Console.WriteLine($"Sampling:   {SPSampling}");
-            Console.WriteLine($"DataType:   {SPDataType}");
-            Console.WriteLine("============================================================");
-            for (int i = 0; i < HdrHistory.Length; i++)
-            {
-                Console.WriteLine($"{i,2} : >{HdrHistory[i]}<");
-            }
-            Console.WriteLine("============================================================");
         }
 
-        private void InterpretKnownBlocks()
+        private void InterpretKnownTypedBlocks()
         {
-            foreach (TypedMemberBlock tmb in memberBlocks)
-                InterpretBlock(tmb);
+            foreach (TypedBlock tb in memberBlocks)
+                InterpretBlock(tb);
         }
 
-        private void InterpretBlock(TypedMemberBlock tmb)
+        private void InterpretBlock(TypedBlock tb)
         {
-            switch ((BlockCodes)tmb.Id)
+            switch ((BlockCodes)tb.Id)
             {
                 case BlockCodes.DataSetDataType:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.UInt)
-                        SPDataType = BitConverter.ToUInt16(tmb.Data, 0);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.UInt)
+                        SPDataType = BitConverter.ToUInt16(tb.Data, 0);
                     break;
                 case BlockCodes.DataSetAbscissaRange:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.CvCoOrdRange)
                     {
-                        SPStartX = BitConverter.ToDouble(tmb.Data, 0);
-                        SPEndX = BitConverter.ToDouble(tmb.Data, SizeofDouble);
+                        SPStartX = BitConverter.ToDouble(tb.Data, 0);
+                        SPEndX = BitConverter.ToDouble(tb.Data, SizeofDouble);
                     }
                     break;
                 case BlockCodes.DataSetOrdinateRange:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdRange)
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.CvCoOrdRange)
                     {
-                        SPMinY = BitConverter.ToDouble(tmb.Data, 0);
-                        SPMaxY = BitConverter.ToDouble(tmb.Data, SizeofDouble);
+                        SPMinY = BitConverter.ToDouble(tb.Data, 0);
+                        SPMaxY = BitConverter.ToDouble(tb.Data, SizeofDouble);
                     }
                     break;
                 case BlockCodes.DataSetInterval:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrd)
-                        SPResolutionX = BitConverter.ToDouble(tmb.Data, 0);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.CvCoOrd)
+                        SPResolutionX = BitConverter.ToDouble(tb.Data, 0);
                     break;
                 case BlockCodes.DataSetNumPoints:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Long)
-                        SPNumPoints = BitConverter.ToInt32(tmb.Data, 0);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Long)
+                        SPNumPoints = BitConverter.ToInt32(tb.Data, 0);
                     break;
                 case BlockCodes.DataSetSamplingMethod:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPSampling = BytesToString(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Char)
+                        SPSampling = BytesToString(tb.Data);
                     break;
                 case BlockCodes.DataSetXAxisLabel:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPLabelX = BytesToString(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Char)
+                        SPLabelX = BytesToString(tb.Data);
                     break;
                 case BlockCodes.DataSetYAxisLabel:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPLabelY = BytesToString(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Char)
+                        SPLabelY = BytesToString(tb.Data);
                     break;
                 case BlockCodes.DataSetXAxisUnitType:
                     //Console.WriteLine(ToPrettyString(tmb.Data));
@@ -136,19 +132,19 @@ namespace Bev.IO.PerkinElmerSP
                     //Console.WriteLine(ToPrettyString(tmb.Data));
                     break;
                 case BlockCodes.DataSetFileType:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPFileType = BytesToString(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Char)
+                        SPFileType = BytesToString(tb.Data);
                     break;
                 case BlockCodes.DataSetData:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.CvCoOrdArray)
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.CvCoOrdArray)
                     {
                         if (pointsY == null)
-                            pointsY = new double[BitConverter.ToInt32(tmb.Data, 0) / SizeofDouble];
+                            pointsY = new double[BitConverter.ToInt32(tb.Data, 0) / SizeofDouble];
                         try
                         {
                             for (int i = 0; i < pointsY.Length; i++)
                             {
-                                pointsY[i] = BitConverter.ToDouble(tmb.Data, DataMemberDataOffset + i * SizeofDouble);
+                                pointsY[i] = BitConverter.ToDouble(tb.Data, DataMemberDataOffset + i * SizeofDouble);
                             }
                         }
                         catch (ArgumentException)
@@ -158,22 +154,29 @@ namespace Bev.IO.PerkinElmerSP
                     }
                     break;
                 case BlockCodes.DataSetName:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPName = BytesToString(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Char)
+                        SPName = BytesToString(tb.Data);
                     break;
                 case BlockCodes.DataSetChecksum:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.ULong)
-                        SPCheckSum = BitConverter.ToUInt32(tmb.Data, 0);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.ULong)
+                        SPCheckSum = BitConverter.ToUInt32(tb.Data, 0);
                     break;
                 case BlockCodes.DataSetHistoryRecord:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
-                        HdrHistory = _XYZZY(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
+                    {
+                        HdrHistory = SegmentHdrHistory(tb.Data);
+                    }
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.HistoryRecord)
+                    {
+                        //TODO this is actually a block of two typed blocks!
+                        HdrHistory = SegmentHdrHistory(tb.Data);
+                    }
                     break;
                 case BlockCodes.DataSetInvalidRegion:
                     break;
                 case BlockCodes.DataSetAlias:
-                    if ((BlockCodes)tmb.TypeCode == BlockCodes.Char)
-                        SPAlias = BytesToString(tmb.Data);
+                    if ((BlockCodes)tb.TypeCode == BlockCodes.Char)
+                        SPAlias = BytesToString(tb.Data);
                     break;
                 case BlockCodes.DataSetVXIRAccyHdr:
                     break;
@@ -203,16 +206,21 @@ namespace Bev.IO.PerkinElmerSP
             Spectrum.AddMetaData("SPSampling", SPSampling);
         }
 
-        private string[] _XYZZY(byte[] data)
+        private string[] SegmentHdrHistory(byte[] data)
         {
-            if (data.Length < 5) return null;
             List<string> hdrLines = new List<string>();
+            if (data.Length < 5)
+            {
+                hdrLines.Add("no HDR history!");
+                return hdrLines.ToArray();
+            }
             for (int i = 1; i < data.Length-1; i++)
             {
                 if(data[i-1] == 0x23 && data[i] == 0x75)
                 {
                     int len = BitConverter.ToInt16(data, i+1);
-                    hdrLines.Add(Encoding.ASCII.GetString(data, i+3, len));
+                    string line = Encoding.ASCII.GetString(data, i + 3, len);
+                    hdrLines.Add(RemoveLineEndings(line));
                 }
             }
             return hdrLines.ToArray();
@@ -225,20 +233,20 @@ namespace Bev.IO.PerkinElmerSP
             Block main = blockFile.Contents.FirstOrDefault(x => x.Id == (short)MainBlock);
             if (main == null)
                 throw new NotSupportedException($"This SP file doesn't contain a {Enum.GetName(typeof(BlockCodes), MainBlock)} block.");
-            SplitToMemberBlocks(main.Data);
+            SplitToTypedBlocks(main.Data);
         }
 
-        private void SplitToMemberBlocks(byte[] data)
+        private void SplitToTypedBlocks(byte[] data)
         {
             using MemoryStream ms = new MemoryStream(data);
             using BinaryReader binReader = new BinaryReader(ms);
             while (binReader.BaseStream.Position < binReader.BaseStream.Length)
             {
-                TypedMemberBlock tmb = null;
+                TypedBlock tb = null;
                 try
                 {
-                    tmb = new TypedMemberBlock(binReader);
-                    memberBlocks.Add(tmb);
+                    tb = new TypedBlock(binReader);
+                    memberBlocks.Add(tb);
                 }
                 catch (EndOfStreamException)
                 {
@@ -246,7 +254,7 @@ namespace Bev.IO.PerkinElmerSP
                 }
             }
         }
-
+        
         private string BytesToString(byte[] data)
         {
             try
@@ -268,6 +276,12 @@ namespace Bev.IO.PerkinElmerSP
                 str += $"{b:X2} ";
             return str;
         }
+
+        private string RemoveLineEndings(string str)
+        {
+            return Regex.Replace(str, @"\r\n|\r|\n", "; ");
+        }
+
 
     }
 }

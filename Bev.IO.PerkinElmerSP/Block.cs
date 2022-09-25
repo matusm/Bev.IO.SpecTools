@@ -10,7 +10,7 @@ namespace Bev.IO.PerkinElmerSP
     /// Data (arbitrary).
     /// For *.SP files "member-blocks" are considered as data of "wrapper-blocks"
     /// </summary>
-    /// <seealso cref="TypedMemberBlock"/>
+    /// <seealso cref="TypedBlock"/>
     public class Block
     {
 
