@@ -23,7 +23,7 @@ namespace SpecConverter
             foreach (string fn in filenames)
             {
                 Spectrum spectrum = LoadSpFile(fn);
-                //WriteSpcFile(spectrum, fn);
+                WriteSpcFile(spectrum, fn);
                 //WriteCsvFile(spectrum, fn);
                 //WriteJcampFile(spectrum, fn);
             }
@@ -92,11 +92,11 @@ namespace SpecConverter
         {
             SpReader spReader = new SpReader(filename);
             //spReader.DebugOutput();
-            Console.WriteLine($"# Lines {spReader.HdrHistory.Length} <- {spReader.FileName}");
+            Console.WriteLine($"# Lines {spReader.History.HdrHistory.Length} <- {spReader.FileName}");
             string outFileName = Path.GetFileName(filename);
             outFileName = Path.ChangeExtension(outFileName, ".txt");
-            outFileName = $"{spReader.HdrHistory.Length}_" + outFileName;
-            WriteToFile(outFileName, spReader.DebugHdrHistory());
+            outFileName = $"{spReader.History.HdrHistory.Length}_" + outFileName;
+            WriteToFile(outFileName, spReader.History.ToDebugString());
             return spReader.Spectrum;
         }
     }

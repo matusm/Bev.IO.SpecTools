@@ -67,6 +67,7 @@
     <Compile Include="Block.cs" />
     <Compile Include="BlockFile.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="HdrHistoryParser.cs" />
     <Compile Include="SpReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypedBlock.cs" />

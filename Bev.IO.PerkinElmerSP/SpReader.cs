@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Bev.IO.PerkinElmerSP
 {
@@ -19,11 +18,12 @@ namespace Bev.IO.PerkinElmerSP
         private double[] pointsY;   // temporary place for the spectrum
 
         public Spectrum Spectrum { get; private set; }
+        public HdrHistoryParser History { get; private set; }
         public string FileName { get; }
         public DateTime FileCreationDate { get; }
 
         // TODO mak all private
-        public string[] HdrHistory { get; private set; }
+        //public string[] HdrHistory { get; private set; }
         public uint SPCheckSum { get; private set; }
         public int SPNumPoints { get; private set; }
         public UInt16 SPDataType { get; private set; }
@@ -51,18 +51,9 @@ namespace Bev.IO.PerkinElmerSP
             Spectrum.SourceFileName = FileName;
             Spectrum.SourceFileCreationDate = FileCreationDate;
             BuildSpectrumPod();
+            History.AddAsMetaData(Spectrum);
         }
 
-        public string DebugHdrHistory()
-        {
-            if (HdrHistory == null) return "no HDR history";
-            if (HdrHistory.Length < 1) return "no HDR history";
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"HDR history of file {FileName}");
-            for (int i = 0; i < HdrHistory.Length; i++)
-                sb.AppendLine($"{i,2} : >{HdrHistory[i]}<");
-            return sb.ToString();
-        }
 
         public void DebugOutput()
         {
@@ -162,15 +153,7 @@ namespace Bev.IO.PerkinElmerSP
                         SPCheckSum = BitConverter.ToUInt32(tb.Data, 0);
                     break;
                 case BlockCodes.DataSetHistoryRecord:
-                    if ((BlockCodes)tb.TypeCode == BlockCodes.InstrHdrHistoryRecord)
-                    {
-                        HdrHistory = SegmentHdrHistory(tb.Data);
-                    }
-                    if ((BlockCodes)tb.TypeCode == BlockCodes.HistoryRecord)
-                    {
-                        //TODO this is actually a block of two typed blocks!
-                        HdrHistory = SegmentHdrHistory(tb.Data);
-                    }
+                    History = new HdrHistoryParser(tb);
                     break;
                 case BlockCodes.DataSetInvalidRegion:
                     break;
@@ -204,26 +187,6 @@ namespace Bev.IO.PerkinElmerSP
             Spectrum.AddMetaData("SPDataType", SPDataType.ToString());
             Spectrum.AddMetaData("SPFileType", SPFileType);
             Spectrum.AddMetaData("SPSampling", SPSampling);
-        }
-
-        private string[] SegmentHdrHistory(byte[] data)
-        {
-            List<string> hdrLines = new List<string>();
-            if (data.Length < 5)
-            {
-                hdrLines.Add("no HDR history!");
-                return hdrLines.ToArray();
-            }
-            for (int i = 1; i < data.Length-1; i++)
-            {
-                if(data[i-1] == 0x23 && data[i] == 0x75)
-                {
-                    int len = BitConverter.ToInt16(data, i+1);
-                    string line = Encoding.ASCII.GetString(data, i + 3, len);
-                    hdrLines.Add(RemoveLineEndings(line));
-                }
-            }
-            return hdrLines.ToArray();
         }
 
         private void AnalyseMainBlock(BlockFile blockFile)
@@ -276,12 +239,6 @@ namespace Bev.IO.PerkinElmerSP
                 str += $"{b:X2} ";
             return str;
         }
-
-        private string RemoveLineEndings(string str)
-        {
-            return Regex.Replace(str, @"\r\n|\r|\n", "; ");
-        }
-
 
     }
 }
