@@ -1,5 +1,4 @@
-﻿using Bev.IO.SpectrumPod;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace Bev.IO.SpectrumPod

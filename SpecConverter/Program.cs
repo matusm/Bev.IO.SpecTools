@@ -93,6 +93,7 @@ namespace SpecConverter
             SpReader spReader = new SpReader(filename);
             //spReader.DebugOutput();
             Console.WriteLine($"# Lines {spReader.History.HdrHistory.Length} <- {spReader.FileName}");
+            //Console.WriteLine();
             string outFileName = Path.GetFileName(filename);
             outFileName = Path.ChangeExtension(outFileName, ".txt");
             outFileName = $"{spReader.History.HdrHistory.Length}_" + outFileName;

@@ -51,7 +51,6 @@ namespace Bev.IO.PerkinElmerSP
             Spectrum.SourceFileName = FileName;
             Spectrum.SourceFileCreationDate = FileCreationDate;
             BuildSpectrumPod();
-            History.AddAsMetaData(Spectrum);
         }
 
 
@@ -181,12 +180,13 @@ namespace Bev.IO.PerkinElmerSP
                 x += SPResolutionX;
             }
             Spectrum.SetUnitNames(SPLabelX, SPLabelY);
-            Spectrum.AddMetaData("SPName", SPName);
-            Spectrum.AddMetaData("SPAlias", SPAlias);
-            Spectrum.AddMetaData("Description", blockFile.Description);
-            Spectrum.AddMetaData("SPDataType", SPDataType.ToString());
-            Spectrum.AddMetaData("SPFileType", SPFileType);
-            Spectrum.AddMetaData("SPSampling", SPSampling);
+            History.AddAsMetaData(Spectrum);
+            Spectrum.AddMetaData("SpName", SPName);
+            Spectrum.AddMetaData("SpAlias", SPAlias);
+            Spectrum.AddMetaData("SpDescription", blockFile.Description);
+            Spectrum.AddMetaData("SpDataType", SPDataType.ToString());
+            Spectrum.AddMetaData("SpFileType", SPFileType);
+            Spectrum.AddMetaData("SpSampling", SPSampling);
         }
 
         private void AnalyseMainBlock(BlockFile blockFile)

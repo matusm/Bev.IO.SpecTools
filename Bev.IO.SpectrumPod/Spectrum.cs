@@ -130,10 +130,10 @@ namespace Bev.IO.SpectrumPod
             header.SetJcampRequiredMetaData("LastX", LastX.ToString());
             header.SetJcampRequiredMetaData("FirstY", FirstY.ToString());
             header.SetJcampMetaData("LastY", LastY.ToString());
-            header.SetJcampMetaData("MaxX", MaxX.ToString());
             header.SetJcampMetaData("MinX", MinX.ToString());
-            header.SetJcampMetaData("MaxY", MaxY.ToString());
+            header.SetJcampMetaData("MaxX", MaxX.ToString());
             header.SetJcampMetaData("MinY", MinY.ToString());
+            header.SetJcampMetaData("MaxY", MaxY.ToString());
             if(!double.IsNaN(DeltaX))
                 header.SetJcampMetaData("DeltaX", DeltaX.ToString());
             header.SetJcampRequiredMetaData("XUnits", XUnitName);

@@ -1,7 +1,6 @@
 ﻿using Bev.IO.SpectrumPod;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -26,13 +25,13 @@ namespace Bev.IO.PerkinElmerSP
             spectrum.AddMetaData("SpectrometerModel", GetInstrument());
             spectrum.AddMetaData("SpectrometerSerialNumber", GetInstrumentSN());
             spectrum.AddMetaData("SoftwareID", GetSoftwareVersion());
+            spectrum.AddMetaData("InstrumentParameters", GetInstrumentParameters());
             spectrum.AddMetaData("Comments", GetComments());
-            spectrum.AddMetaData("Parameter0", GetParameter0()); // int time
-            spectrum.AddMetaData("Parameter1", GetParameter1()); // monochromator/detector change
+            spectrum.AddMetaData("Bandpass", GetBandpass());
+            spectrum.AddMetaData("DetectorChange", GetDetectorChange()); // monochromator/detector change
             spectrum.AddMetaData("SampleBeamPosition", GetBeamPosition()); // sample beam position
             spectrum.AddMetaData("CommonBeamDepolarizer", GetCBD()); // common beam depolarizer ?
-            spectrum.AddMetaData("Parameter4", GetParameter4()); // attenuators
-
+            spectrum.AddMetaData("Attenuators", GetAttenuators()); // attenuators
         }
 
         public string ToDebugString()
@@ -51,11 +50,23 @@ namespace Bev.IO.PerkinElmerSP
         private string GetInstrumentSN() => GetHdrHistoryLine(6);
         private string GetSoftwareVersion() => GetHdrHistoryLine(7);
         private string GetComments() => GetHdrHistoryLine(8);
-        private string GetParameter4() => HdrHistory[HdrHistory.Length - 14];
+        private string GetAttenuators() => HdrHistory[HdrHistory.Length - 14];
         private string GetCBD() => HdrHistory[HdrHistory.Length - 15];
         private string GetBeamPosition() => HdrHistory[HdrHistory.Length - 16];
-        private string GetParameter1() => HdrHistory[HdrHistory.Length - 17];
+        private string GetDetectorChange() => HdrHistory[HdrHistory.Length - 17];
         private string GetParameter0() => HdrHistory[HdrHistory.Length - 22];
+        private string GetInstrumentParameters()
+        {
+            int idx = FindUvVisIndex();
+            if (idx < 0) return string.Empty;
+            return GetHdrHistoryLine(idx + 1);
+        }
+        private string GetBandpass()
+        {
+            int idx = FindUvVisIndex();
+            if (idx < 0) return string.Empty;
+            return GetHdrHistoryLine(idx - 1);
+        }
 
         private string GetHdrHistoryLine(int lineNumber)
         {
@@ -65,11 +76,24 @@ namespace Bev.IO.PerkinElmerSP
             return HdrHistory[corLineNumber];
         }
 
+        private int FindUvVisIndex()
+        {
+            for (int i = 0; i < 40; i++)
+            {
+                if (GetHdrHistoryLine(i)=="UV/VIS")
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         private int NumberOfSubblocks()
         {
-            if(HdrHistory.Length > 39)
+            int minLength = 36;
+            if(HdrHistory.Length > minLength)
             {
-                return (HdrHistory.Length - 39)/5;
+                return (HdrHistory.Length - minLength) /5;
             }
             return 0;
         }
