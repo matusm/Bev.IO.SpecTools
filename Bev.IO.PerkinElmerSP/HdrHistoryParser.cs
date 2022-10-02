@@ -11,27 +11,74 @@ namespace Bev.IO.PerkinElmerSP
         private HdrType hdrType = HdrType.Unkown;
 
         public string[] HdrHistory { get; private set; }
+        public Dictionary<string, string> HdrHistoryDict { get; private set; }
 
         public HdrHistoryParser(TypedBlock historyBlock)
         {
+            HdrHistoryDict = new Dictionary<string, string>();
             ParseBlock(historyBlock);
+            GenerateHistoryDict();
         }
 
-        public void AddAsMetaData(Spectrum spectrum)
+        private void GenerateHistoryDict()
         {
-            spectrum.AddMetaData("Title", GetTitle());
-            spectrum.AddMetaData("Owner", GetUser());
-            spectrum.AddMetaData("SampleDescription", GetTitle());
-            spectrum.AddMetaData("SpectrometerModel", GetInstrument());
-            spectrum.AddMetaData("SpectrometerSerialNumber", GetInstrumentSN());
-            spectrum.AddMetaData("SoftwareID", GetSoftwareVersion());
-            spectrum.AddMetaData("InstrumentParameters", GetInstrumentParameters());
-            spectrum.AddMetaData("Comments", GetComments());
-            spectrum.AddMetaData("Bandpass", GetBandpass());
-            spectrum.AddMetaData("DetectorChange", GetDetectorChange()); // monochromator/detector change
-            spectrum.AddMetaData("SampleBeamPosition", GetBeamPosition()); // sample beam position
-            spectrum.AddMetaData("CommonBeamDepolarizer", GetCBD()); // common beam depolarizer ?
-            spectrum.AddMetaData("Attenuators", GetAttenuators()); // attenuators
+            HdrHistoryDict.Clear();
+            if (FindUvVisIndex() < 0)
+            {
+                GenerateRawHistoryDict();
+            }
+            else
+            {
+                GenerateSpHistoryDict();
+            }
+        }
+
+        private void GenerateRawHistoryDict()
+        {
+            Dictionary<int, string> tempDict = new Dictionary<int, string>();
+            for (int i = 0; i < HdrHistory.Length; i++)
+            {
+                string value = HdrHistory[i].Trim();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    tempDict[i] = value;
+                }
+            }
+            // remove dupes
+            List<string> vals = new List<string>();
+            Dictionary<int, string> newDict = new Dictionary<int, string>();
+            foreach (KeyValuePair<int, string> item in tempDict)
+            {
+                if (!vals.Contains(item.Value))
+                {
+                    newDict.Add(item.Key, item.Value);
+                    vals.Add(item.Value);
+                }
+            }
+            // add metadata
+            string prefix = "HdrHistory_";
+            foreach (KeyValuePair<int, string> item in newDict)
+            {
+                string keyword = $"{prefix}{item.Key}";
+                HdrHistoryDict[keyword] = item.Value;
+            }
+        }
+
+        private void GenerateSpHistoryDict()
+        {
+            HdrHistoryDict["Title"] = GetTitle();
+            HdrHistoryDict["Owner"] = GetUser();
+            HdrHistoryDict["SampleDescription"] = GetTitle();
+            HdrHistoryDict["SpectrometerModel"] = GetInstrument();
+            HdrHistoryDict["SpectrometerSerialNumber"] = GetInstrumentSN();
+            HdrHistoryDict["SoftwareID"] = GetSoftwareVersion();
+            HdrHistoryDict["InstrumentParameters"] = GetInstrumentParameters();
+            HdrHistoryDict["Comments"] = GetComments();
+            HdrHistoryDict["Bandpass"] = GetBandpass();
+            HdrHistoryDict["DetectorChange"] = GetDetectorChange(); // monochromator/detector change
+            HdrHistoryDict["SampleBeamPosition"] = GetBeamPosition(); // sample beam position
+            HdrHistoryDict["CommonBeamDepolarizer"] = GetCBD(); // common beam depolarizer ?
+            HdrHistoryDict["Attenuators"] = GetAttenuators(); // attenuators
         }
 
         public string ToDebugString()
@@ -54,7 +101,6 @@ namespace Bev.IO.PerkinElmerSP
         private string GetCBD() => HdrHistory[HdrHistory.Length - 15];
         private string GetBeamPosition() => HdrHistory[HdrHistory.Length - 16];
         private string GetDetectorChange() => HdrHistory[HdrHistory.Length - 17];
-        private string GetParameter0() => HdrHistory[HdrHistory.Length - 22];
         private string GetInstrumentParameters()
         {
             int idx = FindUvVisIndex();

@@ -14,8 +14,8 @@ namespace SpecConverter
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            //string workingDirectory = Directory.GetCurrentDirectory();
-            string workingDirectory = @"C:\Users\User\Desktop\sp_examples";
+            string workingDirectory = Directory.GetCurrentDirectory();
+            //string workingDirectory = @"C:\Users\User\Desktop\sp_examples";
             string[] filenames = Directory.GetFiles(workingDirectory, @"*.sp");
             //string[] filenames = { "Sample27.Sample.sp", "Sample28.Sample.sp" };
             Array.Sort(filenames);
@@ -91,11 +91,11 @@ namespace SpecConverter
         private static Spectrum LoadSpFile(string filename)
         {
             SpReader spReader = new SpReader(filename);
-            //spReader.DebugOutput();
+            spReader.DebugOutput();
             Console.WriteLine($"# Lines {spReader.History.HdrHistory.Length} <- {spReader.FileName}");
             //Console.WriteLine();
             string outFileName = Path.GetFileName(filename);
-            outFileName = Path.ChangeExtension(outFileName, ".txt");
+            outFileName = Path.ChangeExtension(outFileName, ".log");
             outFileName = $"{spReader.History.HdrHistory.Length}_" + outFileName;
             WriteToFile(outFileName, spReader.History.ToDebugString());
             return spReader.Spectrum;

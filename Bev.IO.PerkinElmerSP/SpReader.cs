@@ -23,7 +23,7 @@ namespace Bev.IO.PerkinElmerSP
         public DateTime FileCreationDate { get; }
 
         // TODO mak all private
-        //public string[] HdrHistory { get; private set; }
+
         public uint SPCheckSum { get; private set; }
         public int SPNumPoints { get; private set; }
         public UInt16 SPDataType { get; private set; }
@@ -52,7 +52,6 @@ namespace Bev.IO.PerkinElmerSP
             Spectrum.SourceFileCreationDate = FileCreationDate;
             BuildSpectrumPod();
         }
-
 
         public void DebugOutput()
         {
@@ -180,13 +179,14 @@ namespace Bev.IO.PerkinElmerSP
                 x += SPResolutionX;
             }
             Spectrum.SetUnitNames(SPLabelX, SPLabelY);
-            History.AddAsMetaData(Spectrum);
             Spectrum.AddMetaData("SpName", SPName);
             Spectrum.AddMetaData("SpAlias", SPAlias);
             Spectrum.AddMetaData("SpDescription", blockFile.Description);
             Spectrum.AddMetaData("SpDataType", SPDataType.ToString());
             Spectrum.AddMetaData("SpFileType", SPFileType);
             Spectrum.AddMetaData("SpSampling", SPSampling);
+            Spectrum.AddMetaData("SpChecksum", SPCheckSum.ToString());
+            Spectrum.AddMetaData(History.HdrHistoryDict);
         }
 
         private void AnalyseMainBlock(BlockFile blockFile)

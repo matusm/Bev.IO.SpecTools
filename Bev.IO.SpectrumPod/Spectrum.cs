@@ -65,6 +65,12 @@ namespace Bev.IO.SpectrumPod
 
         public void AddMetaData(string key, string value) => header.SetMetaData(key, value);
 
+        public void AddMetaData(Dictionary<string, string> metaDataDict)
+        {
+            foreach (var item in metaDataDict)
+                AddMetaData(item.Key, item.Value);
+        }
+
         private string GetMetaDataAsJcamp(bool justify)
         {
             PopulateJcampComputedMetaData();
