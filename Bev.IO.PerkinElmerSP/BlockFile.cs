@@ -22,7 +22,7 @@ namespace Bev.IO.PerkinElmerSP
                 throw new NotSupportedException("This is not a Perkin-Elmer block file.");
             byte[] description = new byte[DescriptionRecordLength];
             file.Read(description, 0, description.Length);
-            Description = Encoding.ASCII.GetString(description);
+            Description = Encoding.ASCII.GetString(description).Trim('\0');
             //Read contents
             List<Block> blocks = new List<Block>(); //Todo: some capacity heuristics based on file length?
             try
