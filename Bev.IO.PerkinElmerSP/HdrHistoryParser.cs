@@ -1,5 +1,4 @@
-﻿using Bev.IO.SpectrumPod;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -139,7 +138,7 @@ namespace Bev.IO.PerkinElmerSP
             int minLength = 36;
             if(HdrHistory.Length > minLength)
             {
-                return (HdrHistory.Length - minLength) /5;
+                return (HdrHistory.Length - minLength) / 5;
             }
             return 0;
         }
